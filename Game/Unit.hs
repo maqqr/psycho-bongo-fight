@@ -7,10 +7,10 @@ type Position = (Int, Int)
 
 data Unit = Unit { name :: String
                  , ap :: Int
-                 , pp :: Double
+                 , pp :: Float
                  , traits :: [T.Trait]
                  , position :: Position
-            } deriving (Show)
+            } deriving (Show, Eq)
 
 instance Describable Unit where
     describe = name
@@ -19,4 +19,6 @@ instance Describable Unit where
 basicUnit :: String -> Position -> Unit
 basicUnit n = Unit n 10 100 []
 
+moveUnit :: Unit -> Position -> Unit
+moveUnit (Unit n a p ts _) = Unit n a p ts
 
