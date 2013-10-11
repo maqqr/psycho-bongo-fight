@@ -10,13 +10,6 @@ import Control.Monad
 import PngToPic
 
 
-{- Simon muistiinpanot:
-
-tee funktiot toIsom ja fromIsom jolla
-voi muuttaa koordinaatteja
-
--}
-
 data Character = Character
 type Squad = [Character]
 
@@ -49,6 +42,9 @@ testmap = concat [ "..#."
                  , ".##."
                  , "...." ]
 
+insideMap :: GameMap -> (Int, Int) -> Bool
+insideMap gamemap = A.inRange (A.bounds gamemap)
+
 convertMap :: Int -> Int -> String -> GameMap
 convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToTile
     where
@@ -59,9 +55,9 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
 initialGame :: ImageRenderer -> Game
 initialGame getImage = Game (Resources getImage (const (return ()))) (WorldState (convertMap 4 4 testmap) [] [])
 
+
 -- todo: laita tyypiksi Position -> (Float, Float)
 toIsom :: (Int, Int) -> (Float, Float)
---toIsom (x, y) = ((fi y * tileWidth / 2.0) + (fi x * tileWidth / 2.0), (fi x * tileHeight / 2.0) - (fi y * tileHeight / 2.0))
 toIsom (x, y) = ((fi y * hw) + (fi x * hw), (fi x * hh) - (fi y * hh))
     where
         hw = tileWidth / 2.0
@@ -69,18 +65,19 @@ toIsom (x, y) = ((fi y * hw) + (fi x * hw), (fi x * hh) - (fi y * hh))
 
 fromIsom :: (Float, Float) -> (Int, Int)
 fromIsom (x, y) = (floor ((x + 2*y) / tileWidth), floor (-(2*y - x) / tileWidth))
-    where
-        hw = tileWidth / 2.0
-        hh = tileHeight / 2.0
+
+convertMouse :: (Float, Float) -> (Int, Int)
+convertMouse (x, y) = let (x', y') = fromIsom (x, y + 64) in (y' + 1, x')
+
 
 drawGame :: Game -> IO Picture
-drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . translate (-100) 0 . scale 2.0 2.0 $ pictures drawTiles
+drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1.0 1.0 $ pictures drawTiles
     where
         drawTiles :: [Picture]
-        drawTiles = [uncurry translate (coord x y) . getImg $ gamemap ! (w-x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
+        drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
-        coord :: Int -> Int -> (Float, Float)
-        coord x y = ((fi y * tileWidth / 2.0) + (fi x * tileWidth / 2.0), (fi x * tileHeight / 2.0) - (fi y * tileHeight / 2.0))
+        drawTile :: (Int, Int) -> Picture
+        drawTile (x, y) = getImg $ gamemap ! (y, x)
 
         (w, h) = snd (A.bounds gamemap)
 
@@ -95,9 +92,10 @@ loadImages = liftM M.fromList . extractM . M.toList . M.map loadImage
 
 
 handleEvent :: Event -> Game -> IO Game
-
-handleEvent (EventMotion mouse@(x, y)) game = do
-    print $ show mouse ++ show (fromIsom mouse)
+handleEvent (EventMotion mouse@(x, y)) game@(Game _ (WorldState gamemap _ _)) = do
+    let m = convertMouse mouse
+    print $ show mouse ++ show m
+    when (insideMap gamemap m) (print (gamemap ! m))
     return game
 
 handleEvent _ game = return game
