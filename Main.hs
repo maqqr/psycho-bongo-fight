@@ -1,11 +1,11 @@
 {-# LANGUAGE TupleSections #-}
-import Data.Char
+module Main where
+
 import Data.Array (Array, (!))
 import qualified Data.Array as A
 import qualified Data.ByteString as B
 import qualified Data.Map as M
 import Graphics.Gloss.Interface.IO.Game
-import Control.Applicative
 import Control.Monad
 import PngToPic
 
@@ -27,7 +27,7 @@ type SoundPlayer = Sound -> IO ()
 data Resources = Resources ImageRenderer SoundPlayer
 data Game = Game Resources WorldState
 
-
+-- | Mäpätään tiilet kuvatiedostoihin
 allImages :: M.Map Tile ImageFilename
 allImages = M.fromList [(Ground, "ground.png"), (Wall, "wall.png")]
 
@@ -42,10 +42,15 @@ testmap = concat [ "..#."
                  , ".##."
                  , "...." ]
 
+-- | Tarkistaa onko annettu koordinaatti pelikentällä
 insideMap :: GameMap -> (Int, Int) -> Bool
 insideMap gamemap = A.inRange (A.bounds gamemap)
 
-convertMap :: Int -> Int -> String -> GameMap
+-- | Muuntaa merkkijonon pelikentäksi
+convertMap :: Int     -- ^ Kentän leveys
+           -> Int     -- ^ Kentän korkeus
+           -> String  -- ^ Kenttä merkkijonona
+           -> GameMap
 convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToTile
     where
         charToTile '.' = Ground
@@ -57,19 +62,23 @@ initialGame getImage = Game (Resources getImage (const (return ()))) (WorldState
 
 
 -- todo: laita tyypiksi Position -> (Float, Float)
+-- | Muuntaa pelikoordinaatit isometrisiksi ruutukoordinaateiksi
 toIsom :: (Int, Int) -> (Float, Float)
 toIsom (x, y) = ((fi y * hw) + (fi x * hw), (fi x * hh) - (fi y * hh))
     where
         hw = tileWidth / 2.0
         hh = tileHeight / 2.0
 
+-- | Muuntaa ruutukoordinaatit pelikoordinaateiksi
 fromIsom :: (Float, Float) -> (Int, Int)
 fromIsom (x, y) = (floor ((x + 2*y) / tileWidth), floor (-(2*y - x) / tileWidth))
 
+-- | Muuntaa hiiren sijainnin pelikoordinaatiksi
 convertMouse :: (Float, Float) -> (Int, Int)
 convertMouse (x, y) = let (x', y') = fromIsom (x, y + 64) in (y' + 1, x')
 
 
+-- | Piirtää pelitilanteen
 drawGame :: Game -> IO Picture
 drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1.0 1.0 $ pictures drawTiles
     where
@@ -81,6 +90,8 @@ drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1
 
         (w, h) = snd (A.bounds gamemap)
 
+
+-- | Lataa pelin kuvat
 loadImages :: M.Map Tile ImageFilename -> IO (M.Map Tile Picture)
 loadImages = liftM M.fromList . extractM . M.toList . M.map loadImage
     where
@@ -91,6 +102,7 @@ loadImages = liftM M.fromList . extractM . M.toList . M.map loadImage
         extractM = mapM (\(a, b) -> liftM (a,) b)
 
 
+-- | Tapahtumien käsittey
 handleEvent :: Event -> Game -> IO Game
 handleEvent (EventMotion mouse@(x, y)) game@(Game _ (WorldState gamemap _ _)) = do
     let m = convertMouse mouse
