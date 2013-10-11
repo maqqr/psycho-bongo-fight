@@ -12,14 +12,6 @@ import PngToPic
 
 {- Simon muistiinpanot:
 
-Glossin akselit on väärinpäin
- => korjaa piirto, ja ota reverse pois
-    kartan määrittelystä
-
-- Piirretäänkö joka tiimi omalla värillä
-  vai näkyykö vastustaja esim. aina
-  punaisena (team color)
-
 tee funktiot toIsom ja fromIsom jolla
 voi muuttaa koordinaatteja
 
@@ -48,10 +40,10 @@ allImages = M.fromList [(Ground, "ground.png"), (Wall, "wall.png")]
 tileWidth = 64
 tileHeight = 32
 
-testmap = concat . reverse $ [ "..#."
-                             , "..#."
-                             , ".##."
-                             , "...." ]
+testmap = concat [ "..#."
+                 , "..#."
+                 , ".##."
+                 , "...." ]
 
 convertMap :: Int -> Int -> String -> GameMap
 convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToTile
@@ -67,11 +59,10 @@ drawGame :: Game -> IO Picture
 drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . translate (-100) 0 . scale 2.0 2.0 $ pictures drawTiles
     where
         drawTiles :: [Picture]
-        drawTiles = [uncurry translate (coord x y) . getImg $ gamemap ! (x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
-        --drawTiles = [uncurry translate (coord x y) . getImg $ GroundImage | x <- [0 .. w-1], y <- [h-1, h-2 .. 0]]
+        drawTiles = [uncurry translate (coord x y) . getImg $ gamemap ! (w-x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
         coord :: Int -> Int -> (Float, Float)
-        coord x y = ((fi y * tileWidth / 2.0) + (fi x * tileWidth / 2.0), (fi x * tileHeight / 2.0) - (fi y * tileHeight / 2.0))
+        coord x y' = let y = y' in ((fi y * tileWidth / 2.0) + (fi x * tileWidth / 2.0), (fi x * tileHeight / 2.0) - (fi y * tileHeight / 2.0))
 
         fi :: (Integral a, Num b) => a -> b
         fi = fromIntegral
