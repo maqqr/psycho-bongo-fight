@@ -1,16 +1,31 @@
 module Game.Actions where
 
 import Game.GameWorld (GameWorld, updateUnit, removeUnit, getUnitTile, getAdjUnits, getUnitAt)
-import Game.Unit (Unit(..), Trait(..), moveUnit, applyCombatTrait)
+import Game.Unit
 import Game.Position (Position)
 import Game.Tile (Tile, tileAttBonus, tileDefBonus)
 import System.Random (randomRIO)
 import Data.Maybe (isNothing)
 
-action :: GameWorld -> Unit -> Position -> IO (GameWorld, [Unit])
-action gw u pos = case getUnitAt gw pos of
-                    Nothing -> return (move gw u pos, [])
-                    Just target -> if team target == team u then return (gw, []) else smack gw u target
+import Game.Client (Client(..))
+import Game.Resources (Resources(..), GameSound)
+
+playSfx :: Client -> GameSound -> IO ()
+playSfx client s = (playSound . resources $ client) s 1.0 False
+
+action :: Client -> Unit -> Position -> IO (GameWorld, [Unit])
+action cli u pos = case getUnitAt gw pos of
+                    Nothing -> do
+                        playSfx cli (moveSound u)
+                        return (move gw u pos, [])
+                    Just target ->
+                        if team target == team u then
+                            return (gw, [])
+                            else do
+                                playSfx cli (attackSound u)
+                                smack gw u target
+  where
+    gw = gameworld cli
 
 -- | Siirtää yksikön annettuun paikkaan.
 -- Huom! Oikeellisuustarkistukset tehdään aiemmin

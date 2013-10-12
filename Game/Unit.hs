@@ -37,6 +37,9 @@ maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 moveSound :: Unit -> R.GameSound
 moveSound _ = R.BearMove
 
+attackSound :: Unit -> R.GameSound
+attackSound _ = R.BearAttack
+
 data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
