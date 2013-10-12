@@ -47,3 +47,7 @@ setUnits (GameWorld m _ t) us = GameWorld m us t
 -- | Tarkistaa onko annettu koordinaatti pelikentällä
 insideMap :: Map -> Position -> Bool
 insideMap gmap = A.inRange (A.bounds gmap)
+
+-- | Palauttaa annetun ukkelin tiilen
+getUnitTile :: GameWorld -> Unit -> Tile
+getUnitTile gw u = gamemap gw ! position u

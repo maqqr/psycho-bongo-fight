@@ -1,6 +1,6 @@
 module Game.Actions where
 
-import GameWorld (GameWorld, updateUnit)
+import GameWorld (GameWorld, updateUnit, getUnitTile)
 import Unit (Unit, Position, moveUnit)
 import Tile (Tile)
 
@@ -18,3 +18,6 @@ smack gw u1 u2 = undefined
 
 getPercentages :: Unit -> Unit -> GameWorld -> (Float, Float)
 getPercentages att def gw = undefined
+  where
+    attTile = getUnitTile gw att
+    defTile = getUnitTile gw def
