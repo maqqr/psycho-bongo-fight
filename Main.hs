@@ -60,7 +60,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected) = return $ pictures drawTiles
+drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy $ pictures drawTiles
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -93,8 +93,8 @@ drawGame (C.Client res world mouse selected) = return $ pictures drawTiles
 
 -- | Tapahtumien käsittey
 handleEvent :: Event -> C.Client -> IO C.Client
-handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _) = do
-    let m = convertMouse mouse
+handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
+    let m = convertMouse scroll mouse
     print $ show mouse ++ show m
     when (G.insideMap gamemap m) (print (gamemap ! m))
     return $ client { C.mousePos = m }
@@ -102,16 +102,27 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _) = do
         gamemap = G.gamemap gameworld
 
 -- Klikkaus kun joku yksikkö on valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection)) = do
-    let m = convertMouse mouse
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll) = do
+    let m = convertMouse scroll mouse
     putStrLn $ "Mouse click (unit) " ++ show mouse
     return client { C.gameworld = G.updateUnit gameworld (selection {U.position = m} ), C.selectedUnit = Nothing }
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing) = do
-    let m = convertMouse mouse
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
+    let m = convertMouse scroll mouse
     putStrLn $ "Mouse click (no unit) " ++ show mouse
     return client { C.selectedUnit = G.getUnitAt gameworld m }
+
+-- Scrollaus nuolinäppäimillä
+handleEvent (EventKey (SpecialKey key) Down _ _) client = do
+    return client { C.scroll = newScroll }
+    where
+        (ox, oy) = C.scroll client
+        newScroll = let (dx, dy) = scrolling key in (ox+dx, oy+dy)
+        scrolling KeyLeft  = ( 30,   0)
+        scrolling KeyRight = (-30,   0)
+        scrolling KeyUp    = (  0, -30)
+        scrolling KeyDown  = (  0,  30)
 
 handleEvent _ game = return game
 

@@ -18,7 +18,7 @@ data GameWorld = GameWorld { gamemap :: Map
 
 initialGameWorld :: IO GameWorld
 initialGameWorld = GameWorld
-                <$> return (blankMap 5 5)
+                <$> return (blankMap 15 15)
                 <*> initialUnits
                 <*> return 0
 

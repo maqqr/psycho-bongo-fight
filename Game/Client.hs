@@ -11,7 +11,8 @@ data Client = Client {
     resources :: R.Resources,
     gameworld :: G.GameWorld,
     mousePos  :: Position,
-    selectedUnit :: Maybe U.Unit
+    selectedUnit :: Maybe U.Unit,
+    scroll    :: (Float, Float)
 }
 
 -- | Luo uuden clientin ja lataa sille resurssit
@@ -21,3 +22,4 @@ newClient = Client
          <*> G.initialGameWorld
          <*> return (0, 0)
          <*> return Nothing
+         <*> return (-150, 0)

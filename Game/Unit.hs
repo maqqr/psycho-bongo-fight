@@ -18,13 +18,13 @@ data Unit = Unit { uuid :: UUID
 
 instance Eq Unit where
     u1 == u2 = uuid u1 == uuid u2
-    
+
 instance Describable Unit where
     describe = name
 
 instance Drawable Unit where
     filename unit
-        | team unit == 0 = "characters/bear.png"
+        | team unit == 0 = "characters/bear1.png"
         | otherwise      = ""
 
 basicUnit :: String -> Position -> IO Unit

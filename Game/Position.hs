@@ -20,5 +20,5 @@ fromIsom :: (Float, Float) -> Position
 fromIsom (x, y) = (floor ((x + 2*y) / R.tileWidth), floor (-(2*y - x) / R.tileWidth))
 
 -- | Muuntaa hiiren sijainnin pelikoordinaatiksi
-convertMouse :: (Float, Float) -> Position
-convertMouse (x, y) = let (x', y') = fromIsom (x, y + 64) in (y' + 1, x')
+convertMouse :: (Float, Float) -> (Float, Float) -> Position
+convertMouse (sx, sy) (x, y) = let (x', y') = fromIsom (x - sx, y + 64 - sy) in (y' + 1, x')
