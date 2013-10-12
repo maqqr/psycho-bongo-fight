@@ -1,5 +1,7 @@
-{-# LANGUAGE TupleSections, RankNTypes #-}
+{-# LANGUAGE CPP, TupleSections, RankNTypes #-}
 module Game.Resources where
+
+#define SOUND
 
 import Control.Monad
 import Control.Applicative
@@ -8,12 +10,23 @@ import qualified Data.Map as M
 import qualified Data.ByteString as B
 import PngToPic
 
+#ifdef SOUND
+import qualified Sound as Snd
+
+withSound = Snd.withSound Snd.defaultSoundConfig {Snd.path = ""}
+#endif
+
+
 type ImageFilename = String
 type ImageStorage = M.Map ImageFilename Picture
 type ImageRenderer = ImageFilename -> Picture
 
-type Sound = String
-type SoundPlayer = Sound -> IO ()
+data GameSound = BongoFight
+
+instance Snd.Playable GameSound where
+    filename BongoFight = "snd\\psycho-bongo-fight.wav"
+
+type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 
 data Resources = Resources {
     drawImage :: ImageRenderer,
@@ -42,9 +55,8 @@ loadImages names = liftM (M.fromList . zip names) (mapM loadImage names)
         loadImage :: ImageFilename -> IO Picture
         loadImage = fmap pngToPic . B.readFile . (++) "img/"
 
-sndplayer :: SoundPlayer
-sndplayer = const $ return ()
-
 -- | Lataa pelin kaikki resurssit
 loadResources :: IO Resources
-loadResources = Resources <$> liftM (M.!) (loadImages allImages) <*> return sndplayer
+loadResources = Resources
+             <$> liftM (M.!) (loadImages allImages)
+             <*> return (\s vol loop -> void $ Snd.playStream s vol loop)

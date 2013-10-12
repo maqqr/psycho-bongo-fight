@@ -1,4 +1,7 @@
+{-# LANGUAGE CPP #-}
 module Main where
+
+#define SOUND
 
 import Data.Array ((!))
 import Data.Maybe (fromMaybe)
@@ -26,6 +29,7 @@ reitinlaskuun:
   voi lyödä enää, ja vihreillä voi lyödä vielä
 
 -}
+
 
 -- | Etsii reitin pelikentällä kahden pisteen välillä
 findPath :: G.GameWorld -- ^ Pelimaailma
@@ -131,13 +135,17 @@ updateGame :: (Float -> C.Client -> IO C.Client)
 updateGame dt client = do
     return client { C.gameworld = G.animateUnits (C.gameworld client) }
 
+playSfx :: C.Client -> R.GameSound -> IO ()
+playSfx client s = (R.playSound . C.resources $ client) s 1.0 False
+
 main :: IO ()
-main = do
+main = R.withSound $ do
     client <- C.newClient
+    playSfx client R.BongoFight
     playIO
         (InWindow "Isometric game" (700, 500) (10, 10))
-        white -- background color (Color)
-        30    -- fps (Int)
+        white   -- background color (Color)
+        30      -- fps (Int)
         client  -- initial game state
         drawGame       -- rendering function (game -> IO Picture)
         handleEvent    -- input handler (Event -> game -> IO game)

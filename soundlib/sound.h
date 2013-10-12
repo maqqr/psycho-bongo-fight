@@ -1,10 +1,9 @@
 #pragma once
-//#define DEBUG
+#define DEBUG
 #define BASS
 
 #include <stdio.h>
 #include <bass.h>
-#include "list.h"
 #define DLLEXPORT __declspec(dllexport)
 
 

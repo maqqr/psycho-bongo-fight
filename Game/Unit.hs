@@ -22,9 +22,7 @@ instance Describable Unit where
     describe = name
 
 instance Drawable Unit where
-    filename unit
-        | team unit == 0 = "characters/"++teamImage unit++show (animFrame unit)++".png"
-        | otherwise      = ""
+    filename unit = "characters/"++teamImage unit++show (animFrame unit)++".png"
 
 
 teamImage :: Unit -> String
