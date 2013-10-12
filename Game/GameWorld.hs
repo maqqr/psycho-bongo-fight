@@ -44,6 +44,7 @@ updateUnit gw nu = setUnits gw [replaceUnit r | r <- units gw]
 setUnits :: GameWorld -> [[Unit]] -> GameWorld
 setUnits (GameWorld m _ t) us = GameWorld m us t
 
+-- | Hakee yksikön tietyn ehdon perusteella
 getUnit :: GameWorld -> (Unit -> Bool) -> Maybe Unit
 getUnit world p = toMaybe $ filter p . concat $ units world
   where
@@ -51,6 +52,7 @@ getUnit world p = toMaybe $ filter p . concat $ units world
     toMaybe (x:_) = Just x
     toMaybe _     = Nothing
 
+-- | Hakee yksikön tietystä kohdasta kentältä
 getUnitAt :: GameWorld -> Position -> Maybe Unit
 getUnitAt world pos = getUnit world (\u -> position u == pos)
 
