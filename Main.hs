@@ -6,6 +6,9 @@ module Main where
 import Data.Array ((!))
 import Data.Maybe (fromMaybe, isNothing, fromJust)
 import qualified Data.Array as A
+import qualified Data.List as L
+import qualified Data.Map as M
+import Data.Tuple (swap)
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
 
@@ -80,10 +83,9 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
         drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture, unitPicture]
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
-                pathPicture
-                    | (x, y) `elem` pathInRange = getImg "greencircle.png"
-                    -- | (x, y) `elem` testpath = getImg "greencircle.png"
-                    | otherwise              = Blank
+                pathPicture = case M.lookup (x, y) pointsInPath of
+                                Nothing -> Blank
+                                Just apLeft -> if apLeft >= 0 then getImg "greencircle.png" else Blank -- color red $ getImg "greencircle.png"
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
@@ -108,10 +110,10 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
 
-        pathInRange :: [Position]
-        pathInRange
-            | isNothing selected = []
-            | otherwise = map snd . filter (\(c,_) -> c >= 0) $ pathWithAp world (fromJust selected) testpath
+        pointsInPath :: M.Map Position Int
+        pointsInPath
+            | isNothing selected = M.empty
+            | otherwise = M.fromList . map swap $ pathWithAp world (fromJust selected) testpath
 
         testpath :: [Position]
         testpath = fromMaybe [] $ selected >>= \u -> findPath world (U.position u) mouse
