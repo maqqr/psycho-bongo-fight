@@ -8,6 +8,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Array as A
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
+import Control.Concurrent
 
 import Game.Position
 import qualified Game.Client as C
@@ -126,8 +127,17 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
     (gw, dead) <- A.action client selection m
+    playDeath dead
     -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
     return client { C.gameworld = gw, C.selectedUnit = Nothing }
+    where
+        playDeath :: [U.Unit] -> IO ()
+        playDeath []    = return ()
+        playDeath (x:xs) = do
+            void . forkIO $ do
+                threadDelay 500000
+                playSfx client (U.deathSound x)
+            playDeath xs
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
