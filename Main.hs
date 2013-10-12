@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Array ((!))
+import Data.Maybe (fromMaybe)
 import qualified Data.Array as A
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
@@ -54,9 +55,12 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
         drawTile :: Position -> Picture
-        drawTile (x, y) = pictures [tilePicture, cursorPicture]
+        drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture]
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
+                pathPicture
+                    | (x, y) `elem` testpath = getImg "greencircle.png"
+                    | otherwise              = Blank
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
@@ -64,6 +68,9 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
         gamemap = G.gamemap world
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
+
+        testpath :: [Position]
+        testpath = fromMaybe [] $ findPath world (0, 0) mouse
 
 
 -- | Tapahtumien käsittey
