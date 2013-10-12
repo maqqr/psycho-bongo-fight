@@ -151,10 +151,13 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 
     let path = fromMaybe [] $ findPath gameworld (U.position selection) m
     let apPath = pathWithAp gameworld selection path
+    let unit = selection { U.ap = fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
     if any (\(ap,_) -> ap < 0) apPath
-        then return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
+        then do
+              -- todo: soita tööttäysääni
+              return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
         else do
-              (gw, dead) <- A.action client selection m
+              (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m
               playDeath dead -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
               return client { C.gameworld = gw, C.selectedUnit = Nothing }
     where
