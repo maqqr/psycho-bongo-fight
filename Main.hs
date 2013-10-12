@@ -81,11 +81,17 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
                 unitPicture = case G.getUnitAt world (x, y) of
-                    Just unit -> pictures [selectionCursor selected unit, getImg $ TC.filename unit]
+                    Just unit -> pictures [selectionCursor selected unit, getImg $ TC.filename unit, healthBar unit]
                     Nothing   -> Blank
                 selectionCursor :: Maybe U.Unit -> U.Unit -> Picture
                 selectionCursor (Just u') u = if u' == u then getImg "cursor.png" else Blank
                 selectionCursor Nothing   _ = Blank
+
+                healthBar u = translate 0.0 25.0 . color (healthBarColor u) $ rectangleSolid (U.pp u / 3.0) 2
+                healthBarColor u
+                    | U.pp u > 50 = green
+                    | U.pp u > 20 = yellow
+                    | otherwise   = red
 
         units = G.units world
         gamemap = G.gamemap world

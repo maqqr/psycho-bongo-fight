@@ -2,7 +2,7 @@ module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit(..), basicUnit, maxFrames)
+import Game.Unit (Unit(..), basicUnit, maxFrames, basicTrait)
 import qualified Data.Array as A
 import Data.Maybe (catMaybes)
 import qualified Data.List as L

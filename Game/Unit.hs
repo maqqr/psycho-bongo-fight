@@ -52,7 +52,7 @@ instance Describable Trait where
 
 
 basicUnit :: String -> Position -> Int -> IO Unit
-basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [] pos team 0
+basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [basicTrait] pos team 0
 
 moveUnit :: Unit -> Position -> Unit
 moveUnit unit newpos = unit { position = newpos }
@@ -65,7 +65,7 @@ traitDescription :: Trait -> String
 traitDescription _ = "Joku treitti"
 
 applyCombatTrait :: Trait -> Unit -> Float
-applyCombatTrait t enemy = undefined
+applyCombatTrait = traitPp
 
 basicTrait :: Trait
 basicTrait = Trait Nothing ppFunc BasicTrait Nothing
