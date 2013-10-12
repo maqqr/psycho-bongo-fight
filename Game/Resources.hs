@@ -12,20 +12,28 @@ import PngToPic
 
 #ifdef SOUND
 import qualified Sound as Snd
-
+withSound :: IO () -> IO ()
 withSound = Snd.withSound Snd.defaultSoundConfig {Snd.path = ""}
+
+#else
+import qualified NoSound as Snd
+withSound :: IO () -> IO ()
+withSound = id
 #endif
+
 
 
 type ImageFilename = String
 type ImageStorage = M.Map ImageFilename Picture
 type ImageRenderer = ImageFilename -> Picture
 
-data GameSound = BongoFight | BearMove
+data GameSound = BongoFight | BGMusic | BearMove | BearAttack
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
+    filename BGMusic    = "snd\\bongo-loop.wav"
     filename BearMove   = "snd\\bear-move.wav"
+    filename BearAttack = "snd\\bear-attack.wav"
 
 type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 

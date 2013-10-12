@@ -37,7 +37,10 @@ maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 moveSound :: Unit -> R.GameSound
 moveSound _ = R.BearMove
 
-data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
+attackSound :: Unit -> R.GameSound
+attackSound _ = R.BearAttack
+
+data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
                    , traitPp :: Unit -> Float
@@ -49,6 +52,9 @@ instance Show Trait where
 
 instance Describable Trait where
     describe = traitDescription
+
+instance Eq Trait where
+    t1 == t2 = traitType t1 == traitType t2
 
 
 basicUnit :: String -> Position -> Int -> IO Unit
@@ -65,8 +71,12 @@ traitDescription :: Trait -> String
 traitDescription _ = "Joku treitti"
 
 applyCombatTrait :: Trait -> Unit -> Float
-applyCombatTrait t enemy = undefined
+applyCombatTrait = traitPp
 
 basicTrait :: Trait
 basicTrait = Trait Nothing ppFunc BasicTrait Nothing
   where ppFunc u = if any (\t -> traitType t == BasicTrait) (traits u) then 0 else 10
+
+-- | Palauttaa ekan liukuluvun, jos yksiköllä on annettu trait, muuten jälkimmäisen
+ifHasTrait :: Unit -> Trait -> Float -> Float -> Float
+ifHasTrait u t f1 f2 = if t `elem` traits u then f1 else f2

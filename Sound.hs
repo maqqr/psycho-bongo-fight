@@ -53,22 +53,3 @@ foreign import ccall unsafe "sound.h channelStop" c'channelStop
 
 foreign import ccall unsafe "sound.h cleanup" c'cleanup
     :: IO ()
-
----------------------------
-
---data GameSound = Boing | Boom
-
---data Music = Music String
-
---instance Playable Music where
---    filename (Music fname) = fname
-
---instance Playable GameSound where
---    filename Boing = "boing.wav"
---    filename Boom  = "boom.wav"
-
---main :: IO ()
---main = withSound defaultSoundConfig {path = "sounds"} $ do
---    putStrLn "Peli alkaa."
---    playSound Boom
---    putStrLn "Peli loppuu."
