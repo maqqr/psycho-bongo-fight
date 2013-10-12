@@ -13,7 +13,7 @@ tileBlocking :: Tile -> Bool
 tileBlocking = isNothing . tileAp
 
 tileAttBonus :: Tile -> Float
-tileAttBonus _ = 0
+tileAttBonus _ = 0 -- todo eri tiilityypeille eri arvot
 
 tileDefBonus :: Tile -> Float
 tileDefBonus _ = 0
