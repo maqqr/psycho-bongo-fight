@@ -18,6 +18,6 @@ data Client = Client {
 newClient :: IO Client
 newClient = Client
          <$> R.loadResources
-         <*> return G.initialGameWorld
+         <*> G.initialGameWorld
          <*> return (0, 0)
          <*> return Nothing

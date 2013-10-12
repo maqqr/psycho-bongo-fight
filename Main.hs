@@ -88,7 +88,7 @@ drawGame (C.Client res world mouse selected) = return $ pictures drawTiles
         (w, h) = snd (A.bounds gamemap)
 
         testpath :: [Position]
-        testpath = fromMaybe [] $ findPath world (0, 0) mouse
+        testpath = fromMaybe [] $ selected >>= \u -> findPath world (U.position u) mouse
 
 
 -- | Tapahtumien käsittey
@@ -101,9 +101,17 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _) = do
     where
         gamemap = G.gamemap gameworld
 
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client = do
-    putStrLn $ "Mouse click " ++ show mouse
-    return client
+-- Klikkaus kun joku yksikkö on valittuna
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection)) = do
+    let m = convertMouse mouse
+    putStrLn $ "Mouse click (unit) " ++ show mouse
+    return client { C.gameworld = G.updateUnit gameworld (selection {U.position = m} ), C.selectedUnit = Nothing }
+
+-- Klikkaus kun mitään hahmoa ei ole valittuna
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing) = do
+    let m = convertMouse mouse
+    putStrLn $ "Mouse click (no unit) " ++ show mouse
+    return client { C.selectedUnit = G.getUnitAt gameworld m }
 
 handleEvent _ game = return game
 
