@@ -60,8 +60,8 @@ traitName _ = "Other trait"
 traitDescription :: Trait -> String
 traitDescription _ = "Joku treitti"
 
-applyTrait :: Trait -> Unit -> Float
-applyTrait t enemy = undefined
+applyCombatTrait :: Trait -> Unit -> Float
+applyCombatTrait t enemy = undefined
 
 basicTrait :: Trait
 basicTrait = Trait Nothing ppFunc BasicTrait Nothing
