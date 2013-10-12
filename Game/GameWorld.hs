@@ -31,12 +31,12 @@ initialGameWorld = GameWorld
                      , "...##."
                      , "....#."
                      , ".####."
-                     , "......"
-                     , "......" ]
+                     , ".,,.T."
+                     , ".,,,.." ]
 
 -- | Luo tyhjän pelikentän
 blankMap :: Int -> Int -> Map
-blankMap w h = A.listArray ((0,0), (h,w)) (repeat BasicTile)
+blankMap w h = A.listArray ((0,0), (h,w)) (repeat GrassTile)
 
 -- | Muuntaa merkkijonon pelikentäksi
 convertMap :: Int     -- ^ Kentän leveys
@@ -45,9 +45,11 @@ convertMap :: Int     -- ^ Kentän leveys
            -> Map
 convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToTile
     where
-        charToTile '.' = BasicTile
+        charToTile '.' = GrassTile
         charToTile '#' = BlockTile
-        charToTile _   = BasicTile
+        charToTile 'T' = TreeTile
+        charToTile ',' = MudTile
+        charToTile _   = GrassTile
 
 initialUnits :: IO [[Unit]]
 initialUnits = mapM sequence [[basicUnit "Matti" (0, 0) 0], [basicUnit "Esko" (1, 1) 1]]

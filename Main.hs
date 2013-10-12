@@ -32,6 +32,7 @@ reitinlaskuun:
 -}
 
 
+
 -- | Etsii reitin pelikentällä kahden pisteen välillä
 findPath :: G.GameWorld -- ^ Pelimaailma
          -> Position    -- ^ Aloituspiste
@@ -65,7 +66,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy $ pictures drawTiles
+drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), pictures guiElements]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -92,6 +93,9 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy
                     | U.pp u > 50 = green
                     | U.pp u > 20 = yellow
                     | otherwise   = red
+
+        guiElements :: [Picture]
+        guiElements = [Blank] --[color red $ rectangleSolid 300 600]
 
         units = G.units world
         gamemap = G.gamemap world
@@ -125,7 +129,11 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (no unit) " ++ show mouse
-    return client { C.selectedUnit = G.getUnitAt gameworld m }
+    case G.getUnitAt gameworld m of
+        Just unit -> do
+            playSfx client (U.selectSound unit)
+            return client { C.selectedUnit = Just unit }
+        Nothing -> return client
 
 -- Scrollaus nuolinäppäimillä
 handleEvent (EventKey (SpecialKey key) Down _ _) client = do
@@ -155,7 +163,7 @@ main = R.withSound $ do
     (R.playSound . C.resources $ client) R.BGMusic 1.0 True
     playIO
         (InWindow "Isometric game" (700, 500) (10, 10))
-        white   -- background color (Color)
+        black   -- background color (Color)
         30      -- fps (Int)
         client  -- initial game state
         drawGame    -- rendering function (game -> IO Picture)
