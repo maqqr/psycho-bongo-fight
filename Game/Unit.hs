@@ -4,6 +4,7 @@ import Data.UUID
 import Data.UUID.V4
 import Game.Position
 import Game.TypeClasses
+import qualified Game.Resources as R
 
 data Unit = Unit { uuid :: UUID
                  , name :: String
@@ -22,16 +23,19 @@ instance Describable Unit where
     describe = name
 
 instance Drawable Unit where
-    filename unit
-        | team unit == 0 = "characters/"++teamImage unit++show (animFrame unit)++".png"
-        | otherwise      = ""
+    filename unit = "characters/"++teamImage unit++show (animFrame unit)++".png"
 
 
 teamImage :: Unit -> String
 teamImage (Unit _ _ _ _ _ _ 0 _) = "bear"
+teamImage (Unit _ _ _ _ _ _ 1 _) = "pirate"
 
 maxFrames :: Unit -> Int
 maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
+maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
+
+moveSound :: Unit -> R.GameSound
+moveSound _ = R.BearMove
 
 data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
 
@@ -47,8 +51,8 @@ instance Describable Trait where
     describe = traitDescription
 
 
-basicUnit :: String -> Position -> IO Unit
-basicUnit n pos = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [] pos 0 0
+basicUnit :: String -> Position -> Int -> IO Unit
+basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [] pos team 0
 
 moveUnit :: Unit -> Position -> Unit
 moveUnit unit newpos = unit { position = newpos }

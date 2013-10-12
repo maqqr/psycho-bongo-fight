@@ -1,4 +1,7 @@
+{-# LANGUAGE CPP #-}
 module Main where
+
+#define SOUND
 
 import Data.Array ((!))
 import Data.Maybe (fromMaybe)
@@ -13,6 +16,7 @@ import qualified Game.Resources as R
 import qualified Game.Tile as T
 import qualified Game.Unit as U
 import qualified Game.TypeClasses as TC
+import qualified Game.Actions as A
 
 import qualified Data.Set as S
 import Data.Graph.AStar
@@ -26,6 +30,7 @@ reitinlaskuun:
   voi lyödä enää, ja vihreillä voi lyödä vielä
 
 -}
+
 
 -- | Etsii reitin pelikentällä kahden pisteen välillä
 findPath :: G.GameWorld -- ^ Pelimaailma
@@ -105,7 +110,10 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll) = do
     let m = convertMouse scroll mouse
     putStrLn $ "Mouse click (unit) " ++ show mouse
-    return client { C.gameworld = G.updateUnit gameworld (selection {U.position = m} ), C.selectedUnit = Nothing }
+    playSfx client R.BearMove
+    (gw, dead) <- A.action gameworld selection m
+    -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
+    return client { C.gameworld = gw, C.selectedUnit = Nothing }
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
@@ -131,13 +139,17 @@ updateGame :: (Float -> C.Client -> IO C.Client)
 updateGame dt client = do
     return client { C.gameworld = G.animateUnits (C.gameworld client) }
 
+playSfx :: C.Client -> R.GameSound -> IO ()
+playSfx client s = (R.playSound . C.resources $ client) s 1.0 False
+
 main :: IO ()
-main = do
+main = R.withSound $ do
     client <- C.newClient
+    playSfx client R.BongoFight
     playIO
         (InWindow "Isometric game" (700, 500) (10, 10))
-        white -- background color (Color)
-        30    -- fps (Int)
+        white   -- background color (Color)
+        30      -- fps (Int)
         client  -- initial game state
         drawGame       -- rendering function (game -> IO Picture)
         handleEvent    -- input handler (Event -> game -> IO game)
