@@ -75,7 +75,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
+drawGame (C.Client res world mouse selected (sx, sy) self others) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -135,7 +135,7 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
 
 -- | Tapahtumien käsittey
 handleEvent :: Event -> C.Client -> IO C.Client
-handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
+handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self others) = do
     let m = convertMouse scroll mouse
     --print $ show mouse ++ show m
     --when (G.insideMap gamemap m) (print (gamemap ! m))
@@ -144,7 +144,7 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
         gamemap = G.gamemap gameworld
 
 -- Klikkaus kun joku yksikkö on valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll) = do
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll self others) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
@@ -170,7 +170,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
             playDeath xs
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll self others) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (no unit) " ++ show mouse
     case G.getUnitAt gameworld m of
