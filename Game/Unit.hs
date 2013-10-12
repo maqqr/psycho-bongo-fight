@@ -23,9 +23,15 @@ instance Describable Unit where
 
 instance Drawable Unit where
     filename unit
-        | team unit == 0 = "characters/bear1.png"
+        | team unit == 0 = "characters/"++teamImage unit++show (animFrame unit)++".png"
         | otherwise      = ""
 
+
+teamImage :: Unit -> String
+teamImage (Unit _ _ _ _ _ _ 0 _) = "bear"
+
+maxFrames :: Unit -> Int
+maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
 
 data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
 

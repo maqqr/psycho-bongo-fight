@@ -2,7 +2,7 @@ module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit(..), basicUnit)
+import Game.Unit (Unit(..), basicUnit, maxFrames)
 import qualified Data.Array as A
 import Data.Maybe (catMaybes)
 import qualified Data.List as L
@@ -52,13 +52,18 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
 initialUnits :: IO [[Unit]]
 initialUnits = mapM sequence [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
 
-
 updateUnit :: GameWorld -> Unit -> GameWorld
 updateUnit gw nu = setUnits gw [replaceUnit r | r <- units gw]
   where replaceUnit row = [if u == nu then nu else u | u <- row]
 
 setUnits :: GameWorld -> [[Unit]] -> GameWorld
 setUnits (GameWorld m _ t) us = GameWorld m us t
+
+animateUnits :: GameWorld -> GameWorld
+animateUnits world = world { units = map (map animateUnit) (units world) }
+  where
+    animateUnit :: Unit -> Unit
+    animateUnit u = u { animFrame = (animFrame u + 1) `mod` maxFrames u }
 
 -- | Hakee yksikön tietyn ehdon perusteella
 getUnit :: GameWorld -> (Unit -> Bool) -> Maybe Unit

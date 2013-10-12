@@ -30,7 +30,10 @@ tileHeight = 32
 
 -- | Lista ladattavista kuvista
 allImages :: [ImageFilename]
-allImages = ["cursor.png", "greencircle.png", "ground.png", "wall.png", "characters/bear1.png"]
+allImages = ["cursor.png", "greencircle.png", "ground.png", "wall.png"] ++ makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
+
+makeAnimation :: String -> Int -> [String]
+makeAnimation name n = ["characters/"++name++show i++".png" | i <- [0..n-1]]
 
 -- | Lataa pelin kuvat
 loadImages :: [ImageFilename] -> IO (M.Map ImageFilename Picture)
