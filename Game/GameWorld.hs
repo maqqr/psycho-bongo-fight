@@ -2,7 +2,7 @@ module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit, basicUnit)
+import Game.Unit (Unit(..), basicUnit)
 import qualified Data.Array as A
 
 type Map = A.Array (Int, Int) Tile
@@ -43,6 +43,16 @@ updateUnit gw nu = setUnits gw [replaceUnit r | r <- units gw]
 
 setUnits :: GameWorld -> [[Unit]] -> GameWorld
 setUnits (GameWorld m _ t) us = GameWorld m us t
+
+getUnit :: GameWorld -> (Unit -> Bool) -> Maybe Unit
+getUnit world p = toMaybe $ filter p . concat $ units world
+  where
+    toMaybe :: [a] -> Maybe a
+    toMaybe (x:_) = Just x
+    toMaybe _     = Nothing
+
+getUnitAt :: GameWorld -> Position -> Maybe Unit
+getUnitAt world pos = getUnit world (\u -> position u == pos)
 
 -- | Tarkistaa onko annettu koordinaatti pelikentällä
 insideMap :: Map -> Position -> Bool

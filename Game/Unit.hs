@@ -19,7 +19,7 @@ instance Describable Unit where
 
 instance Drawable Unit where
 	filename unit
-		| team unit == 0 = "bear" ++ show (animFrame unit) ++ ".png"
+		| team unit == 0 = "characters/bear.png"
 		| otherwise      = ""
 
 basicUnit :: String -> Position -> Unit
