@@ -110,6 +110,7 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll) = do
     let m = convertMouse scroll mouse
     putStrLn $ "Mouse click (unit) " ++ show mouse
+    playSfx client R.BearMove
     (gw, dead) <- A.action gameworld selection m
     -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
     return client { C.gameworld = gw, C.selectedUnit = Nothing }

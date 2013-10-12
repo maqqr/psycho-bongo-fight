@@ -21,10 +21,11 @@ type ImageFilename = String
 type ImageStorage = M.Map ImageFilename Picture
 type ImageRenderer = ImageFilename -> Picture
 
-data GameSound = BongoFight
+data GameSound = BongoFight | BearMove
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
+    filename BearMove   = "snd\\bear-move.wav"
 
 type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 
