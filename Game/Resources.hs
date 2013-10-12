@@ -37,7 +37,7 @@ loadImages :: [ImageFilename] -> IO (M.Map ImageFilename Picture)
 loadImages names = liftM (M.fromList . zip names) (mapM loadImage names)
     where
         loadImage :: ImageFilename -> IO Picture
-        loadImage = fmap pngToPic . B.readFile
+        loadImage = fmap pngToPic . B.readFile . (++) "img/"
 
 sndplayer :: SoundPlayer
 sndplayer = const $ return ()
