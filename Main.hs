@@ -151,7 +151,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 
     let path = fromMaybe [] $ findPath gameworld (U.position selection) m
     let apPath = pathWithAp gameworld selection path
-    let unit = selection { U.ap = fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
+    let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
     if any (\(ap,_) -> ap < 0) apPath
         then do
               -- todo: soita tööttäysääni
@@ -178,6 +178,9 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
             playSfx client (U.selectSound unit)
             return client { C.selectedUnit = Just unit }
         Nothing -> return client
+
+-- Testaa AP:n palauttamista oletusarvoihin
+handleEvent (EventKey (Char 'r') Down _ _) client = return client { C.gameworld = G.resetAps (C.gameworld client) }
 
 -- Scrollaus nuolinäppäimillä
 handleEvent (EventKey (SpecialKey key) Down _ _) client = do

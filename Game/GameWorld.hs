@@ -2,9 +2,9 @@ module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit(..), basicUnit, maxFrames, basicTrait)
+import Game.Unit (Unit(..), Trait(..), basicUnit, maxFrames, basicTrait)
 import qualified Data.Array as A
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, fromMaybe)
 import qualified Data.List as L
 import Control.Applicative
 
@@ -112,3 +112,10 @@ getAdjPositions gw pos =  [(x, y) | (y,x) <- adjs pos, isBetween minX maxX x && 
 
 isBetween :: Ord a => a -> a -> a -> Bool
 isBetween lower upper x = x >= lower && x <= upper
+
+-- | Palauttaa kullekin yksikölle oletus-AP:t
+resetAps :: GameWorld -> GameWorld
+resetAps gw = gw { units = map (\team -> [getAp u | u <- team]) (units gw) }
+  where
+    getAp u = u { ap = 10 + traitApBonus (traits u) }
+    traitApBonus ts = sum [fromMaybe 0 (traitAp t) | t <- ts]
