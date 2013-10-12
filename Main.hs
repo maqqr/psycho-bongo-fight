@@ -86,7 +86,12 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
                 pathPicture = case M.lookup (x, y) pointsInPath of
                                 Nothing -> Blank
-                                Just apLeft -> if apLeft >= 0 then getImg "greencircle.png" else Blank -- color red $ getImg "greencircle.png"
+                                Just apLeft -> pathPicByAp apLeft
+                pathPicByAp ap
+                    | ap > 2 = getImg "greencircle.png"
+                    | ap > 0 = getImg "yellowcircle.png"
+                    | otherwise = getImg "redcircle.png"
+
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank

@@ -70,7 +70,7 @@ allImages :: [ImageFilename]
 allImages = tiles ++ other ++ characters
 	where
 		tiles = ["grass.png", "ground.png", "wall.png", "tree.png", "mud.png"]
-		other = ["cursor.png", "greencircle.png"]
+		other = ["cursor.png", "greencircle.png", "yellowcircle.png", "redcircle.png"]
 		characters = makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
 
 makeAnimation :: String -> Int -> [String]
