@@ -37,7 +37,7 @@ maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 moveSound :: Unit -> R.GameSound
 moveSound _ = R.BearMove
 
-data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
+data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
                    , traitPp :: Unit -> Float
@@ -52,7 +52,7 @@ instance Describable Trait where
 
 
 basicUnit :: String -> Position -> Int -> IO Unit
-basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [basicTrait] pos team 0
+basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [] pos team 0
 
 moveUnit :: Unit -> Position -> Unit
 moveUnit unit newpos = unit { position = newpos }
@@ -70,3 +70,7 @@ applyCombatTrait = traitPp
 basicTrait :: Trait
 basicTrait = Trait Nothing ppFunc BasicTrait Nothing
   where ppFunc u = if any (\t -> traitType t == BasicTrait) (traits u) then 0 else 10
+
+-- | Palauttaa ekan liukuluvun, jos yksiköllä on annettu trait, muuten jälkimmäisen
+ifHasTrait :: Unit -> Trait -> Float -> Float
+ifHasTrait = undefined
