@@ -1,0 +1,1 @@
+gcc sound.c -shared -std=c99 -Wall -Wextra -o sound.dll -lbass -ID:\cpplib\bass24\c -LD:\cpplib\bass24\c
