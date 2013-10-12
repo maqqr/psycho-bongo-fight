@@ -48,7 +48,9 @@ selectSound (Unit _ _ _ _ _ _ 0 _) = R.BearSelect
 selectSound (Unit _ _ _ _ _ _ 1 _) = R.PirateSelect
 
 deathSound :: Unit -> R.GameSound
-deathSound _ = R.BearDie
+deathSound (Unit _ _ _ _ _ _ 0 _) = R.BearDie
+deathSound (Unit _ _ _ _ _ _ 1 _) = R.PirateDie
+
 
 data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
 

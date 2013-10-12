@@ -11,6 +11,7 @@ import qualified Data.Map as M
 import Data.Tuple (swap)
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
+import Control.Concurrent
 
 import Game.Position
 import qualified Game.Client as C
@@ -74,7 +75,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), pictures guiElements]
+drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -102,8 +103,12 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
                     | U.pp u > 20 = yellow
                     | otherwise   = red
 
-        guiElements :: [Picture]
-        guiElements = [Blank] --[color red $ rectangleSolid 300 600]
+        guiElements :: Maybe U.Unit -> Picture
+        guiElements Nothing = Blank
+        guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, unitInfo]
+            where
+                unitInfo :: Picture
+                unitInfo = scale 0.2 0.2 . color black . text . TC.describe $ unit
 
         units = G.units world
         gamemap = G.gamemap world
@@ -136,8 +141,17 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     --playSfx client R.BearMove
 
     (gw, dead) <- A.action client selection m
+    playDeath dead
     -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
     return client { C.gameworld = gw, C.selectedUnit = Nothing }
+    where
+        playDeath :: [U.Unit] -> IO ()
+        playDeath []    = return ()
+        playDeath (x:xs) = do
+            void . forkIO $ do
+                threadDelay 500000
+                playSfx client (U.deathSound x)
+            playDeath xs
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
