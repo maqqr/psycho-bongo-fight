@@ -24,9 +24,10 @@ smack gw att def = do
     (attBonus, defBonus) <- getDamageBonus gw att def
     attDmg <- dmg attBonus (pp att)
     defDmg <- dmg defBonus (pp def)
+    putStrLn $ "attDmg: " ++ show attDmg ++ " defDmg: " ++ show defDmg
     let (gw', dead) = applyDamage gw att defDmg
     let (gw'', dead') = applyDamage gw' def attDmg
-    return (gw, dead ++ dead')
+    return (gw'', dead ++ dead')
   where dmg bonus pp = randomRIO (0.5,1.0) >>= \r -> return (r * bonus * pp)
 
 applyDamage :: GameWorld -> Unit -> Float -> (GameWorld, [Unit])
@@ -36,7 +37,7 @@ applyDamage gw u dmg = if dmg >= pp u
 
 getDamageBonus :: GameWorld -> Unit -> Unit -> IO (Float, Float)
 getDamageBonus gw att def = do
-    let (r1,r2) = (0.3, 0.3)
+    let (r1,r2) = (0.3, 0.3) -- todo: ota randomit
     return (sum [r1, attTileBonus, attAdjUnitsBonus, attTraitBonus], sum [r2, defTileBonus, defAdjUnitsBonus, defTraitBonus])
   where
     attTileBonus = tileAttBonus $ getUnitTile gw att
