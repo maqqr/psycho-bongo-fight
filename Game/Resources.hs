@@ -44,7 +44,7 @@ instance Snd.Playable GameSound where
     filename BearMove   = "snd\\bear-move.wav"
     filename BearAttack = "snd\\bear-attack.wav"
     filename BearDie    = "snd\\bear-killed.wav"
-    filename BearSelect = "snd\\bear-move.wav"
+    filename BearSelect = "snd\\bear-select.wav"
     filename PirateMove = "snd\\pirate-move.wav"
     filename PirateAttack = "snd\\pirate-attack.wav"
     filename PirateDie  = "snd\\pirate-killed.wav"
@@ -69,9 +69,9 @@ tileHeight = 32
 allImages :: [ImageFilename]
 allImages = tiles ++ other ++ characters
 	where
-		tiles = ["grass.png", "ground.png", "wall.png", "tree.png", "mud.png"]
-		other = ["cursor.png", "greencircle.png", "yellowcircle.png", "redcircle.png"]
-		characters = makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
+    tiles = ["grass.png", "ground.png", "wall.png", "tree.png", "tree2.png", "mud.png", "water.png", "stone2.png", "stone3.png"]
+    other = ["cursor.png", "greencircle.png", "yellowcircle.png", "redcircle.png"]
+    characters = makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
 
 makeAnimation :: String -> Int -> [String]
 makeAnimation name n = ["characters/"++name++show i++".png" | i <- [0..n-1]]

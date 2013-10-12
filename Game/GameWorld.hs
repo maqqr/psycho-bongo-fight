@@ -25,14 +25,18 @@ initialGameWorld = GameWorld
                 <*> initialUnits
                 <*> return 0
   where
-    mappi = convertMap 6 6 testmap
+    mappi = convertMap 10 10 testmap
 
-    testmap = concat [ "......"
-                     , "...##."
-                     , "....#."
-                     , ".####."
-                     , ".,,.T."
-                     , ".,,,.." ]
+    testmap = concat [ "...o......"
+                     , "...##..Y.."
+                     , "....#.o..."
+                     , ".####..OY."
+                     , ".,,.T....."
+                     , ".,,,..Y.O."
+                     , "===,......"
+                     , ",,==......"
+                     , ",,,=....O."
+                     , ".,,=..o..." ]
 
 -- | Luo tyhjän pelikentän
 blankMap :: Int -> Int -> Map
@@ -48,7 +52,11 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
         charToTile '.' = GrassTile
         charToTile '#' = BlockTile
         charToTile 'T' = TreeTile
+        charToTile 'Y' = Tree2Tile
         charToTile ',' = MudTile
+        charToTile 'o' = RockTile
+        charToTile 'O' = Rock2Tile
+        charToTile '=' = WaterTile
         charToTile _   = GrassTile
 
 initialUnits :: IO [[Unit]]

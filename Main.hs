@@ -110,10 +110,14 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
 
         guiElements :: Maybe U.Unit -> Picture
         guiElements Nothing = Blank
-        guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, unitInfo]
+        guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, translate (-140) 250 unitInfo]
             where
                 unitInfo :: Picture
-                unitInfo = scale 0.2 0.2 . color black . text . TC.describe $ unit
+                unitInfo = scale 0.2 0.2 . color black . pictures . multiline 0 . lines . TC.describe $ unit
+
+                multiline :: Float -> [String] -> [Picture]
+                multiline _ []     = [Blank]
+                multiline y (x:xs) = translate 0 y (text x) : multiline (y-120) xs
 
         units = G.units world
         gamemap = G.gamemap world
