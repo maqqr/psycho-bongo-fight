@@ -1,6 +1,6 @@
 module Game.Actions where
 
-import GameWorld (GameWorld, updateUnit, getUnitTile)
+import GameWorld (GameWorld, updateUnit, getUnitTile, getAdjUnits)
 import Unit (Unit, Position, moveUnit)
 import Tile (Tile)
 
@@ -21,3 +21,7 @@ getPercentages att def gw = undefined
   where
     attTile = getUnitTile gw att
     defTile = getUnitTile gw def
+    attAdjEnemies = filter (\u -> team u /= team att) (getAdjUnits gw att)
+    defAdjEnemies = filter (\u -> team u /= team def) (getAdjUnits gw def)
+    attTraitBonus = sum [applyTrait t def | t <- traits att]
+    defTraitBonus = sum [applyTrait t att | t <- traits def]
