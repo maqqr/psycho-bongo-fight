@@ -75,7 +75,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy) self others) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
+drawGame (C.Client res world mouse selected (sx, sy) self others) = return $ pictures [translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -108,17 +108,21 @@ drawGame (C.Client res world mouse selected (sx, sy) self others) = return $ pic
                     | U.pp u > 20 = yellow
                     | otherwise   = red
 
+        turnInfo :: Picture
+        turnInfo = translate (-200) 250 . scale 0.3 0.3 . color red . text $ "Turn: " ++ show currentTurn
+
         guiElements :: Maybe U.Unit -> Picture
         guiElements Nothing = Blank
         guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, translate (-140) 250 unitInfo]
             where
                 unitInfo :: Picture
-                unitInfo = scale 0.2 0.2 . color black . pictures . multiline 0 . lines . TC.describe $ unit
+                unitInfo = scale 0.3 0.3 . color black . pictures . multiline 0 . lines . TC.describe $ unit
 
                 multiline :: Float -> [String] -> [Picture]
                 multiline _ []     = [Blank]
-                multiline y (x:xs) = translate 0 y (text x) : multiline (y-120) xs
+                multiline y (x:xs) = translate 0 y (text x) : multiline (y-160) xs
 
+        currentTurn = G.turn world
         units = G.units world
         gamemap = G.gamemap world
         getImg  = R.drawImage res
