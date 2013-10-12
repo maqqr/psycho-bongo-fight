@@ -40,6 +40,9 @@ moveSound _ = R.BearMove
 attackSound :: Unit -> R.GameSound
 attackSound _ = R.BearAttack
 
+deathSound :: Unit -> R.GameSound
+deathSound _ = R.BearDie
+
 data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
