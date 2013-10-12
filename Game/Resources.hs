@@ -52,7 +52,7 @@ tileHeight = 32
 
 -- | Lista ladattavista kuvista
 allImages :: [ImageFilename]
-allImages = ["cursor.png", "greencircle.png", "ground.png", "wall.png"] ++ makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
+allImages = ["cursor.png", "greencircle.png", "grass.png", "ground.png", "wall.png"] ++ makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
 
 makeAnimation :: String -> Int -> [String]
 makeAnimation name n = ["characters/"++name++show i++".png" | i <- [0..n-1]]
