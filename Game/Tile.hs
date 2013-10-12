@@ -3,12 +3,22 @@ module Game.Tile where
 import Data.Maybe (isNothing)
 import Game.TypeClasses
 
-data Tile = BlockTile | GrassTile | TreeTile | MudTile deriving (Eq, Ord, Show)
+data Tile = BlockTile
+          | GrassTile
+          | TreeTile
+          | Tree2Tile
+          | RockTile
+          | Rock2Tile
+          | WaterTile
+          | MudTile deriving (Eq, Ord, Show)
 
 tileAp :: Tile -> Maybe Int
 tileAp BlockTile = Nothing
 tileAp GrassTile = Just 2
 tileAp MudTile   = Just 3
+tileAp RockTile  = Just 4
+tileAp Rock2Tile = Just 4
+tileAp WaterTile = Just 4
 tileAp _ = Nothing
 
 tileBlocking :: Tile -> Bool
@@ -30,5 +40,8 @@ instance Drawable Tile where
     filename GrassTile = "grass.png"
     filename BlockTile = "wall.png"
     filename TreeTile  = "tree.png"
+    filename Tree2Tile = "tree2.png"
     filename MudTile   = "mud.png"
-
+    filename RockTile  = "stone2.png"
+    filename Rock2Tile = "stone3.png"
+    filename WaterTile = "water.png"
