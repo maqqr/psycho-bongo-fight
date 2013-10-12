@@ -27,13 +27,28 @@ type ImageFilename = String
 type ImageStorage = M.Map ImageFilename Picture
 type ImageRenderer = ImageFilename -> Picture
 
-data GameSound = BongoFight | BGMusic | BearMove | BearAttack
+data GameSound = BongoFight
+               | BGMusic
+               | BearMove
+               | BearAttack
+               | BearDie
+               | BearSelect
+               | PirateMove
+               | PirateAttack
+               | PirateDie
+               | PirateSelect
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
     filename BGMusic    = "snd\\bongo-loop.wav"
     filename BearMove   = "snd\\bear-move.wav"
     filename BearAttack = "snd\\bear-attack.wav"
+    filename BearDie    = "snd\\bear-killed.wav"
+    filename BearSelect = "snd\\bear-move.wav"
+    filename PirateMove = "snd\\pirate-move.wav"
+    filename PirateAttack = "snd\\pirate-attack.wav"
+    filename PirateDie  = "snd\\pirate-killed.wav"
+    filename PirateSelect = "snd\\pirate-select.wav"
 
 type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 
@@ -52,7 +67,11 @@ tileHeight = 32
 
 -- | Lista ladattavista kuvista
 allImages :: [ImageFilename]
-allImages = ["cursor.png", "greencircle.png", "grass.png", "ground.png", "wall.png"] ++ makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
+allImages = tiles ++ other ++ characters
+	where
+		tiles = ["grass.png", "ground.png", "wall.png", "tree.png", "mud.png"]
+		other = ["cursor.png", "greencircle.png"]
+		characters = makeAnimation "bear" 2 ++ makeAnimation "pirate" 2
 
 makeAnimation :: String -> Int -> [String]
 makeAnimation name n = ["characters/"++name++show i++".png" | i <- [0..n-1]]
