@@ -4,7 +4,10 @@ import Game.Position
 import Game.Tile (Tile(..))
 import Game.Unit (Unit(..), basicUnit)
 import qualified Data.Array as A
+import Data.Maybe (catMaybes)
+import qualified Data.List as L
 import Control.Applicative
+
 
 type Map = A.Array (Int, Int) Tile
 
@@ -47,7 +50,7 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
         charToTile _   = BasicTile
 
 initialUnits :: IO [[Unit]]
-initialUnits = sequence . map sequence $ [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
+initialUnits = mapM sequence [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
 
 
 updateUnit :: GameWorld -> Unit -> GameWorld
@@ -76,3 +79,16 @@ insideMap gmap = A.inRange (A.bounds gmap)
 -- | Palauttaa annetun ukkelin tiilen
 getUnitTile :: GameWorld -> Unit -> Tile
 getUnitTile gw u = gamemap gw A.! position u
+
+-- | Palauttaa yksiköt, jotka ovat yhden siiron päästä annetusta yksiköstä
+getAdjUnits :: GameWorld -> Unit -> [Unit]
+getAdjUnits gw u = catMaybes [getUnitAt gw p | p <- getAdjPositions gw (position u)]
+
+getAdjPositions :: GameWorld -> Position -> [Position]
+getAdjPositions gw pos =  [(x, y) | (y,x) <- adjs pos, isBetween minX maxX x && isBetween minY maxY y]
+  where
+    ((minX, minY), (maxX, maxY)) = A.bounds $ gamemap gw
+    adjs (y,x) = [(y+y',x+x') | y' <- [-1..1], x' <- [-1..1], (x',y') /= (0,0)]
+
+isBetween :: Ord a => a -> a -> a -> Bool
+isBetween lower upper x = x >= lower && x <= upper
