@@ -22,8 +22,8 @@ move gw u pos = updateUnit gw (moveUnit u pos)
 smack :: GameWorld -> Unit -> Unit -> IO (GameWorld, [Unit])
 smack gw att def = do
     (attBonus, defBonus) <- getDamageBonus gw att def
-    attDmg <- dmg attBonus (pp att)
-    defDmg <- dmg defBonus (pp def)
+    attDmg <- fmap (max 5) $ dmg attBonus (pp att)
+    defDmg <- fmap (max 5) $ dmg defBonus (pp def)
     putStrLn $ "attDmg: " ++ show attDmg ++ " defDmg: " ++ show defDmg
     let (gw', dead) = applyDamage gw att defDmg
     let (gw'', dead') = applyDamage gw' def attDmg
