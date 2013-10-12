@@ -1,4 +1,4 @@
-module Player where
+module Game.Player where
 
 import Unit (Unit)
 

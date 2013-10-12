@@ -1,8 +1,8 @@
-module Tile where
+module Game.Tile where
 
-import TypeClasses (Describable(describe))
+import Game.TypeClasses (Describable(describe))
 
-data Tile = BasicTile | BlockTile deriving (Show)
+data Tile = BasicTile | BlockTile deriving (Eq, Ord, Show)
 
 tileAp :: Tile -> Int
 tileAp BasicTile = 1

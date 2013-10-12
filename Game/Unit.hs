@@ -1,7 +1,7 @@
-module Unit where
+module Game.Unit where
 
-import qualified Trait as T
-import TypeClasses (Describable(describe))
+import qualified Game.Trait as T
+import Game.TypeClasses (Describable(describe))
 
 type Position = (Int, Int)
 

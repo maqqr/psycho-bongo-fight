@@ -1,4 +1,4 @@
-module Actions where
+module Game.Actions where
 
 import GameWorld (GameWorld, updateUnit)
 import Unit (Unit, Position, moveUnit)

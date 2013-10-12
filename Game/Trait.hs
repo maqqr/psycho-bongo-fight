@@ -1,6 +1,6 @@
-module Trait where
+module Game.Trait where
 
-import TypeClasses (Describable(describe))
+import Game.TypeClasses (Describable(describe))
 
 data Trait = Trait { ap :: Int
                    , pp :: Float

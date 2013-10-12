@@ -1,4 +1,3 @@
-{-# LANGUAGE TupleSections #-}
 module Main where
 
 import Data.Array (Array, (!))
@@ -7,29 +6,23 @@ import qualified Data.ByteString as B
 import qualified Data.Map as M
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
-import PngToPic
 
+import qualified Game.Client as C
+import qualified Game.GameWorld as G
+import qualified Game.Tile as T
+import qualified Game.Resources as R
 
+{- Vanhat testityypit:
 data Character = Character
 type Squad = [Character]
 
 data Tile = Ground | Wall deriving (Eq, Ord, Show)
 type GameMap = Array (Int, Int) Tile
 data WorldState = WorldState GameMap Squad Squad
+-}
 
+--data Game = Game Resources WorldState
 
-type ImageFilename = String
-type ImageRenderer = Tile -> Picture
-
-type Sound = String
-type SoundPlayer = Sound -> IO ()
-
-data Resources = Resources ImageRenderer SoundPlayer
-data Game = Game Resources WorldState
-
--- | Mäpätään tiilet kuvatiedostoihin
-allImages :: M.Map Tile ImageFilename
-allImages = M.fromList [(Ground, "ground.png"), (Wall, "wall.png")]
 
 tileWidth = 64
 tileHeight = 32
@@ -43,22 +36,22 @@ testmap = concat [ "..#."
                  , "...." ]
 
 -- | Tarkistaa onko annettu koordinaatti pelikentällä
-insideMap :: GameMap -> (Int, Int) -> Bool
+insideMap :: G.Map -> (Int, Int) -> Bool
 insideMap gamemap = A.inRange (A.bounds gamemap)
 
 -- | Muuntaa merkkijonon pelikentäksi
 convertMap :: Int     -- ^ Kentän leveys
            -> Int     -- ^ Kentän korkeus
            -> String  -- ^ Kenttä merkkijonona
-           -> GameMap
+           -> G.Map
 convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToTile
     where
-        charToTile '.' = Ground
-        charToTile '#' = Wall
-        charToTile _   = Ground
+        charToTile '.' = T.BasicTile
+        charToTile '#' = T.BlockTile
+        charToTile _   = T.BasicTile
 
-initialGame :: ImageRenderer -> Game
-initialGame getImage = Game (Resources getImage (const (return ()))) (WorldState (convertMap 4 4 testmap) [] [])
+--initialGame :: ImageRenderer -> Game
+--initialGame getImage = Game (Resources getImage (const (return ()))) (WorldState (convertMap 4 4 testmap) [] [])
 
 
 -- todo: laita tyypiksi Position -> (Float, Float)
@@ -79,8 +72,9 @@ convertMouse (x, y) = let (x', y') = fromIsom (x, y + 64) in (y' + 1, x')
 
 
 -- | Piirtää pelitilanteen
-drawGame :: Game -> IO Picture
-drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1.0 1.0 $ pictures drawTiles
+drawGame :: C.Client -> IO Picture
+--drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1.0 1.0 $ pictures drawTiles
+drawGame (C.Client res world) = return $ pictures drawTiles
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -88,40 +82,32 @@ drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1
         drawTile :: (Int, Int) -> Picture
         drawTile (x, y) = getImg $ gamemap ! (y, x)
 
+        gamemap = G.map world
+        getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
 
 
--- | Lataa pelin kuvat
-loadImages :: M.Map Tile ImageFilename -> IO (M.Map Tile Picture)
-loadImages = liftM M.fromList . extractM . M.toList . M.map loadImage
-    where
-        loadImage :: ImageFilename -> IO Picture
-        loadImage = fmap pngToPic . B.readFile
-
-        extractM :: Monad m => [(a, m b)] -> m [(a, b)]
-        extractM = mapM (\(a, b) -> liftM (a,) b)
-
-
 -- | Tapahtumien käsittey
-handleEvent :: Event -> Game -> IO Game
-handleEvent (EventMotion mouse@(x, y)) game@(Game _ (WorldState gamemap _ _)) = do
+handleEvent :: Event -> C.Client -> IO C.Client
+handleEvent (EventMotion mouse@(x, y)) cli@(C.Client _ gameworld) = do
     let m = convertMouse mouse
     print $ show mouse ++ show m
     when (insideMap gamemap m) (print (gamemap ! m))
-    return game
+    return cli
+    where
+        gamemap = G.map gameworld
 
 handleEvent _ game = return game
 
 
 main :: IO ()
 main = do
-    images <- loadImages allImages
-
+    client <- C.newClient
     playIO
         (InWindow "Isometric game" (700, 500) (10, 10))
         white -- background color (Color)
         30    -- fps (Int)
-        (initialGame (images M.!))  -- initial game state
+        client  -- initial game state
         drawGame       -- rendering function (game -> IO Picture)
         handleEvent    -- input handler (Event -> game -> IO game)
         (const return) -- update function (Float -> game -> IO game)
