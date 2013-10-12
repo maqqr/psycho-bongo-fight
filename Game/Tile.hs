@@ -26,5 +26,5 @@ instance Describable Tile where
     describe _ = "Magical mystery tile"
 
 instance Drawable Tile where
-	filename BasicTile = "ground.png"
-	filename BlockTile = "wall.png"
+    filename BasicTile = "grass.png"
+    filename BlockTile = "wall.png"
