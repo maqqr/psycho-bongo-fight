@@ -4,10 +4,11 @@ module Main where
 #define SOUND
 
 import Data.Array ((!))
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isNothing, fromJust)
 import qualified Data.Array as A
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
+import Control.Concurrent
 
 import Game.Position
 import qualified Game.Client as C
@@ -30,6 +31,11 @@ reitinlaskuun:
   voi lyödä enää, ja vihreillä voi lyödä vielä
 
 -}
+pathWithAp :: G.GameWorld -> U.Unit -> [Position] -> [(Int, Position)]
+pathWithAp gw u ps = tail . reverse $ foldl f [(U.ap u, U.position u)] ps
+  where
+    f ls@((ap,_):acc) p = (ap - apCost p, p) : ls
+    apCost pos = fromMaybe 10000 . T.tileAp $ G.gamemap gw A.! pos
 
 
 
@@ -66,7 +72,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), pictures guiElements]
+drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -76,7 +82,8 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
                 pathPicture
-                    | (x, y) `elem` testpath = getImg "greencircle.png"
+                    | (x, y) `elem` pathInRange = getImg "greencircle.png"
+                    -- | (x, y) `elem` testpath = getImg "greencircle.png"
                     | otherwise              = Blank
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
@@ -94,13 +101,22 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
                     | U.pp u > 20 = yellow
                     | otherwise   = red
 
-        guiElements :: [Picture]
-        guiElements = [Blank] --[color red $ rectangleSolid 300 600]
+        guiElements :: Maybe U.Unit -> Picture
+        guiElements Nothing = Blank
+        guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, unitInfo]
+            where
+                unitInfo :: Picture
+                unitInfo = scale 0.2 0.2 . color black . text . TC.describe $ unit
 
         units = G.units world
         gamemap = G.gamemap world
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
+
+        pathInRange :: [Position]
+        pathInRange
+            | isNothing selected = []
+            | otherwise = map snd . filter (\(c,_) -> c >= 0) $ pathWithAp world (fromJust selected) testpath
 
         testpath :: [Position]
         testpath = fromMaybe [] $ selected >>= \u -> findPath world (U.position u) mouse
@@ -121,9 +137,19 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
+
     (gw, dead) <- A.action client selection m
+    playDeath dead
     -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
     return client { C.gameworld = gw, C.selectedUnit = Nothing }
+    where
+        playDeath :: [U.Unit] -> IO ()
+        playDeath []    = return ()
+        playDeath (x:xs) = do
+            void . forkIO $ do
+                threadDelay 500000
+                playSfx client (U.deathSound x)
+            playDeath xs
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do

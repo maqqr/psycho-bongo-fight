@@ -6,6 +6,7 @@ import Game.TypeClasses
 data Tile = BlockTile | GrassTile | TreeTile | MudTile deriving (Eq, Ord, Show)
 
 tileAp :: Tile -> Maybe Int
+tileAp BlockTile = Nothing
 tileAp GrassTile = Just 2
 tileAp MudTile   = Just 3
 tileAp _ = Nothing
