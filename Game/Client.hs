@@ -2,6 +2,7 @@ module Game.Client where
 
 import Control.Applicative
 import Game.Position
+import Game.Player
 import qualified Game.GameWorld as G
 import qualified Game.Resources as R
 import qualified Game.Unit as U
@@ -12,7 +13,9 @@ data Client = Client {
     gameworld :: G.GameWorld,
     mousePos  :: Position,
     selectedUnit :: Maybe U.Unit,
-    scroll    :: (Float, Float)
+    scroll    :: (Float, Float),
+    player    :: Player,
+    others    :: [Player]
 }
 
 -- | Luo uuden clientin ja lataa sille resurssit
@@ -23,3 +26,6 @@ newClient = Client
          <*> return (0, 0)
          <*> return Nothing
          <*> return (-150, 0)
+         <*> return (Player "pelaaja" 0)
+         <*> return []
+
