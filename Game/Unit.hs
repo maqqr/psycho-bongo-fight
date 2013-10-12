@@ -27,9 +27,11 @@ instance Drawable Unit where
 
 teamImage :: Unit -> String
 teamImage (Unit _ _ _ _ _ _ 0 _) = "bear"
+teamImage (Unit _ _ _ _ _ _ 1 _) = "pirate"
 
 maxFrames :: Unit -> Int
 maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
+maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 
 data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
 
