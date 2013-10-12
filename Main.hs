@@ -145,10 +145,14 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
 
-    (gw, dead) <- A.action client selection m
-    playDeath dead
-    -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
-    return client { C.gameworld = gw, C.selectedUnit = Nothing }
+    let path = fromMaybe [] $ findPath gameworld (U.position selection) m
+    let apPath = pathWithAp gameworld selection path
+    if any (\(ap,_) -> ap < 0) apPath
+        then return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
+        else do
+              (gw, dead) <- A.action client selection m
+              playDeath dead -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
+              return client { C.gameworld = gw, C.selectedUnit = Nothing }
     where
         playDeath :: [U.Unit] -> IO ()
         playDeath []    = return ()
