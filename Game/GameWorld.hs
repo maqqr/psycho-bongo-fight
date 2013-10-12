@@ -43,10 +43,14 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
 initialUnits :: IO [[Unit]]
 initialUnits = mapM sequence [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
 
-
+-- | Päivittää pelimaailman yksikköä
 updateUnit :: GameWorld -> Unit -> GameWorld
 updateUnit gw nu = setUnits gw [replaceUnit r | r <- units gw]
   where replaceUnit row = [if u == nu then nu else u | u <- row]
+
+-- | Poistaa yksikön pelimaailmasta
+removeUnit :: GameWorld -> Unit -> GameWorld
+removeUnit gw ru = setUnits gw [filter (/= ru) r | r <- units gw]
 
 setUnits :: GameWorld -> [[Unit]] -> GameWorld
 setUnits (GameWorld m _ t) us = GameWorld m us t

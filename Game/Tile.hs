@@ -12,6 +12,13 @@ tileAp BlockTile = Nothing
 tileBlocking :: Tile -> Bool
 tileBlocking = isNothing . tileAp
 
+tileAttBonus :: Tile -> Float
+tileAttBonus = undefined
+
+tileDefBonus :: Tile -> Float
+tileDefBonus = undefined
+
+
 
 instance Describable Tile where
     describe BasicTile = "Basic tile"
