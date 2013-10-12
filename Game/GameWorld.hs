@@ -62,4 +62,4 @@ insideMap gmap = A.inRange (A.bounds gmap)
 
 -- | Palauttaa annetun ukkelin tiilen
 getUnitTile :: GameWorld -> Unit -> Tile
-getUnitTile gw u = gamemap gw ! position u
+getUnitTile gw u = gamemap gw A.! position u
