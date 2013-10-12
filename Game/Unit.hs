@@ -40,7 +40,7 @@ moveSound _ = R.BearMove
 attackSound :: Unit -> R.GameSound
 attackSound _ = R.BearAttack
 
-data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
+data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
                    , traitPp :: Unit -> Float
@@ -53,9 +53,12 @@ instance Show Trait where
 instance Describable Trait where
     describe = traitDescription
 
+instance Eq Trait where
+    t1 == t2 = traitType t1 == traitType t2
+
 
 basicUnit :: String -> Position -> Int -> IO Unit
-basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [basicTrait] pos team 0
+basicUnit n pos team = nextRandom >>= \uuid -> return $ Unit uuid n 10 100 [] pos team 0
 
 moveUnit :: Unit -> Position -> Unit
 moveUnit unit newpos = unit { position = newpos }
@@ -73,3 +76,7 @@ applyCombatTrait = traitPp
 basicTrait :: Trait
 basicTrait = Trait Nothing ppFunc BasicTrait Nothing
   where ppFunc u = if any (\t -> traitType t == BasicTrait) (traits u) then 0 else 10
+
+-- | Palauttaa ekan liukuluvun, jos yksiköllä on annettu trait, muuten jälkimmäisen
+ifHasTrait :: Unit -> Trait -> Float -> Float -> Float
+ifHasTrait u t f1 f2 = if t `elem` traits u then f1 else f2
