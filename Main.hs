@@ -131,6 +131,10 @@ handleEvent (EventKey (SpecialKey key) Down _ _) client = do
 handleEvent _ game = return game
 
 
+updateGame :: (Float -> C.Client -> IO C.Client)
+updateGame dt client = do
+    return client { C.gameworld = G.animateUnits (C.gameworld client) }
+
 main :: IO ()
 main = do
     client <- C.newClient
@@ -141,4 +145,4 @@ main = do
         client  -- initial game state
         drawGame       -- rendering function (game -> IO Picture)
         handleEvent    -- input handler (Event -> game -> IO game)
-        (const return) -- update function (Float -> game -> IO game)
+        updateGame -- update function (Float -> game -> IO game)

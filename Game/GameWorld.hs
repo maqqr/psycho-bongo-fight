@@ -2,7 +2,7 @@ module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit(..), basicUnit)
+import Game.Unit (Unit(..), basicUnit, maxFrames)
 import qualified Data.Array as A
 import Data.Maybe (catMaybes)
 import qualified Data.List as L
@@ -63,6 +63,12 @@ removeUnit gw ru = setUnits gw [filter (/= ru) r | r <- units gw]
 
 setUnits :: GameWorld -> [[Unit]] -> GameWorld
 setUnits (GameWorld m _ t) us = GameWorld m us t
+
+animateUnits :: GameWorld -> GameWorld
+animateUnits world = world { units = map (map animateUnit) (units world) }
+  where
+    animateUnit :: Unit -> Unit
+    animateUnit u = u { animFrame = (animFrame u + 1) `mod` maxFrames u }
 
 -- | Hakee yksikön tietyn ehdon perusteella
 getUnit :: GameWorld -> (Unit -> Bool) -> Maybe Unit
