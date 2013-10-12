@@ -1,6 +1,6 @@
 module Game.Player where
 
-import Unit (Unit)
+import Game.Unit (Unit)
 
 data Player = Player { name :: String
                      , units :: [Unit] } deriving (Show)

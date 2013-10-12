@@ -1,9 +1,7 @@
 module Main where
 
-import Data.Array (Array, (!))
+import Data.Array ((!))
 import qualified Data.Array as A
-import qualified Data.ByteString as B
-import qualified Data.Map as M
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
 
@@ -11,6 +9,13 @@ import qualified Game.Client as C
 import qualified Game.GameWorld as G
 import qualified Game.Tile as T
 import qualified Game.Resources as R
+import qualified Game.TypeClasses as TC
+
+{- Simon muistiinpanot:
+
+Siirrä Position, toIsom, fromIsom, jne. omaan tiedostoon?
+
+-}
 
 {- Vanhat testityypit:
 data Character = Character
@@ -24,7 +29,10 @@ data WorldState = WorldState GameMap Squad Squad
 --data Game = Game Resources WorldState
 
 
+tileWidth :: Float
 tileWidth = 64
+
+tileHeight :: Float
 tileHeight = 32
 
 fi :: (Integral a, Num b) => a -> b
@@ -80,7 +88,7 @@ drawGame (C.Client res world) = return $ pictures drawTiles
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (x, y) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
         drawTile :: (Int, Int) -> Picture
-        drawTile (x, y) = getImg $ gamemap ! (y, x)
+        drawTile (x, y) = getImg . TC.filename $ gamemap ! (y, x)
 
         gamemap = G.map world
         getImg  = R.drawImage res
@@ -89,7 +97,7 @@ drawGame (C.Client res world) = return $ pictures drawTiles
 
 -- | Tapahtumien käsittey
 handleEvent :: Event -> C.Client -> IO C.Client
-handleEvent (EventMotion mouse@(x, y)) cli@(C.Client _ gameworld) = do
+handleEvent (EventMotion mouse) cli@(C.Client _ gameworld) = do
     let m = convertMouse mouse
     print $ show mouse ++ show m
     when (insideMap gamemap m) (print (gamemap ! m))
