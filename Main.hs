@@ -89,7 +89,7 @@ drawGame (C.Client res world mouse selected (sx, sy) self others) = return $ pic
                                 Just apLeft -> pathPicByAp apLeft
                 pathPicByAp ap
                     | ap > 2 = getImg "greencircle.png"
-                    | ap > 0 = getImg "yellowcircle.png"
+                    | ap >= 0 = getImg "yellowcircle.png"
                     | otherwise = getImg "redcircle.png"
 
                 cursorPicture
