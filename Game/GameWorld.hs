@@ -6,6 +6,8 @@ import Game.Unit (Unit(..), basicUnit)
 import qualified Data.Array as A
 import Data.Maybe (catMaybes)
 import qualified Data.List as L
+import Control.Applicative
+
 
 type Map = A.Array (Int, Int) Tile
 
@@ -17,8 +19,11 @@ data GameWorld = GameWorld { gamemap :: Map
                  } deriving (Show)
 
 
-initialGameWorld :: GameWorld
-initialGameWorld = GameWorld (blankMap 5 5) initialUnits 0
+initialGameWorld :: IO GameWorld
+initialGameWorld = GameWorld
+                <$> return (blankMap 15 15)
+                <*> initialUnits
+                <*> return 0
 
 -- | Luo tyhjän pelikentän
 blankMap :: Int -> Int -> Map
@@ -35,8 +40,8 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
         charToTile '#' = BlockTile
         charToTile _   = BasicTile
 
-initialUnits :: [[Unit]]
-initialUnits = [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
+initialUnits :: IO [[Unit]]
+initialUnits = mapM sequence [[basicUnit "Matti" (0, 0)], [basicUnit "Esko" (1, 1)]]
 
 
 updateUnit :: GameWorld -> Unit -> GameWorld
