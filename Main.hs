@@ -13,6 +13,7 @@ import qualified Game.Resources as R
 import qualified Game.Tile as T
 import qualified Game.Unit as U
 import qualified Game.TypeClasses as TC
+import qualified Game.Actions as A
 
 import qualified Data.Set as S
 import Data.Graph.AStar
@@ -105,7 +106,10 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll) = do
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll) = do
     let m = convertMouse scroll mouse
     putStrLn $ "Mouse click (unit) " ++ show mouse
-    return client { C.gameworld = G.updateUnit gameworld (selection {U.position = m} ), C.selectedUnit = Nothing }
+    (gw, dead) <- A.action gameworld selection m
+    -- todo: käsittele kuolleet
+    return client { C.gameworld = gw, C.selectedUnit = Nothing }
+    -- return client { C.gameworld = G.updateUnit gameworld (selection {U.position = m} ), C.selectedUnit = Nothing }
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
