@@ -59,7 +59,7 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
         drawTile :: Position -> Picture
-        drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture]
+        drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture, unitPicture]
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
                 pathPicture
@@ -68,7 +68,9 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
+                unitPicture = undefined
 
+        units = G.units world
         gamemap = G.gamemap world
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
