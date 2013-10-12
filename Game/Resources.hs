@@ -30,14 +30,14 @@ tileHeight = 32
 
 -- | Lista ladattavista kuvista
 allImages :: [ImageFilename]
-allImages = ["cursor.png", "greencircle.png", "ground.png", "wall.png"]
+allImages = ["cursor.png", "greencircle.png", "ground.png", "wall.png", "characters/bear.png"]
 
 -- | Lataa pelin kuvat
 loadImages :: [ImageFilename] -> IO (M.Map ImageFilename Picture)
 loadImages names = liftM (M.fromList . zip names) (mapM loadImage names)
     where
         loadImage :: ImageFilename -> IO Picture
-        loadImage = fmap pngToPic . B.readFile
+        loadImage = fmap pngToPic . B.readFile . (++) "img/"
 
 sndplayer :: SoundPlayer
 sndplayer = const $ return ()

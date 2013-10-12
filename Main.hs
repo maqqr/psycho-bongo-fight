@@ -52,14 +52,13 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
---drawGame (Game (Resources getImg _) (WorldState gamemap _ _)) = return . scale 1.0 1.0 $ pictures drawTiles
 drawGame (C.Client res world mouse) = return $ pictures drawTiles
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
         drawTile :: Position -> Picture
-        drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture]
+        drawTile (x, y) = pictures [tilePicture, cursorPicture, pathPicture, unitPicture]
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
                 pathPicture
@@ -68,7 +67,11 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
+                unitPicture = case G.getUnitAt world (x, y) of
+                    Just unit -> getImg $ TC.filename unit
+                    Nothing   -> Blank
 
+        units = G.units world
         gamemap = G.gamemap world
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
