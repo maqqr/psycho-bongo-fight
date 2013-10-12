@@ -66,7 +66,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), pictures guiElements]
+drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [translate sx sy (pictures drawTiles), guiElements selected]
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -94,8 +94,12 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return $ pictures [trans
                     | U.pp u > 20 = yellow
                     | otherwise   = red
 
-        guiElements :: [Picture]
-        guiElements = [Blank] --[color red $ rectangleSolid 300 600]
+        guiElements :: Maybe U.Unit -> Picture
+        guiElements Nothing = Blank
+        guiElements (Just unit) = translate 300 0 $ pictures [color white $ rectangleSolid 300 600, unitInfo]
+            where
+                unitInfo :: Picture
+                unitInfo = scale 0.2 0.2 . color black . text . TC.describe $ unit
 
         units = G.units world
         gamemap = G.gamemap world
