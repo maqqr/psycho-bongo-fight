@@ -1,9 +1,9 @@
 module Game.Unit where
 
+import Game.Position
 import qualified Game.Trait as T
 import Game.TypeClasses (Describable(describe))
 
-type Position = (Int, Int)
 
 data Unit = Unit { name :: String
                  , ap :: Int

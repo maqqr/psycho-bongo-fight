@@ -20,9 +20,17 @@ data Resources = Resources {
     playSound :: SoundPlayer
 }
 
+-- | Tiilen leveys pikseleinä
+tileWidth :: Float
+tileWidth = 64
+
+-- | Tiilen korkeus pikseleinä
+tileHeight :: Float
+tileHeight = 32
+
 -- | Lista ladattavista kuvista
 allImages :: [ImageFilename]
-allImages = ["ground.png", "wall.png"]
+allImages = ["cursor.png", "ground.png", "wall.png"]
 
 -- | Lataa pelin kuvat
 loadImages :: [ImageFilename] -> IO (M.Map ImageFilename Picture)
