@@ -10,6 +10,8 @@ import Game.Position
 import qualified Game.Client as C
 import qualified Game.GameWorld as G
 import qualified Game.Resources as R
+import qualified Game.Tile as T
+import qualified Game.Unit as U
 import qualified Game.TypeClasses as TC
 
 import qualified Data.Set as S
@@ -33,17 +35,23 @@ findPath :: G.GameWorld -- ^ Pelimaailma
 findPath world start end = aStar neighbours distance (heuristicDistance end) (==end) start
     where
         neighbours :: Position -> S.Set Position
-        neighbours (px, py) = S.fromList $ filter canMove [newpos | (dx, dy) <- deltaMoves, let newpos = (px+dx, py+dy), G.insideMap (G.gamemap world) newpos]
+        neighbours (px, py) = S.fromList $ filter canMove [newpos | (dx, dy) <- deltaMoves, let newpos = (px+dx, py+dy), G.insideMap gamemap newpos]
             where
                 canMove :: Position -> Bool
-                canMove = const True
+                -- todo: ei ota huomioon muita yksikköjä, ne pitäs blockaa myös
+                canMove pos = not . T.tileBlocking $ gamemap ! pos
 
                 deltaMoves :: [Position]
                 deltaMoves = [(1, 0), (-1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
 
+        gamemap = G.gamemap world
+
         -- | Kahden vierekkäisen pisteen välinen etäisyys
         distance :: Position -> Position -> Int
-        distance _ _ = 1
+        distance a b = getAp a + getAp b
+            where
+                getAp :: Position -> Int
+                getAp p = fromMaybe (maxBound :: Int) . T.tileAp $ gamemap ! p
 
         -- | Pisteen heuristinen etäisyys maaliin
         heuristicDistance :: Position -> Position -> Int
@@ -52,7 +60,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse) = return $ pictures drawTiles
+drawGame (C.Client res world mouse selected) = return $ pictures drawTiles
     where
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
@@ -68,8 +76,11 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
                     | (x, y) == mouse = getImg "cursor.png"
                     | otherwise       = Blank
                 unitPicture = case G.getUnitAt world (x, y) of
-                    Just unit -> getImg $ TC.filename unit
+                    Just unit -> pictures [selectionCursor selected unit, getImg $ TC.filename unit]
                     Nothing   -> Blank
+                selectionCursor :: Maybe U.Unit -> U.Unit -> Picture
+                selectionCursor (Just u') u = if u' == u then getImg "cursor.png" else Blank
+                selectionCursor Nothing   _ = Blank
 
         units = G.units world
         gamemap = G.gamemap world
@@ -82,7 +93,7 @@ drawGame (C.Client res world mouse) = return $ pictures drawTiles
 
 -- | Tapahtumien käsittey
 handleEvent :: Event -> C.Client -> IO C.Client
-handleEvent (EventMotion mouse) client@(C.Client _ gameworld _) = do
+handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _) = do
     let m = convertMouse mouse
     print $ show mouse ++ show m
     when (G.insideMap gamemap m) (print (gamemap ! m))
