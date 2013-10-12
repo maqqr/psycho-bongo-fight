@@ -4,7 +4,7 @@ module Main where
 #define SOUND
 
 import Data.Array ((!))
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isNothing, fromJust)
 import qualified Data.Array as A
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
@@ -30,6 +30,11 @@ reitinlaskuun:
   voi lyödä enää, ja vihreillä voi lyödä vielä
 
 -}
+pathWithAp :: G.GameWorld -> U.Unit -> [Position] -> [(Int, Position)]
+pathWithAp gw u ps = tail . reverse $ foldl f [(U.ap u, U.position u)] ps
+  where
+    f ls@((ap,_):acc) p = (ap - apCost p, p) : ls
+    apCost pos = fromMaybe 10000 . T.tileAp $ G.gamemap gw A.! pos
 
 
 -- | Etsii reitin pelikentällä kahden pisteen välillä
@@ -75,7 +80,8 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy
             where
                 tilePicture = getImg . TC.filename $ gamemap ! (x, y)
                 pathPicture
-                    | (x, y) `elem` testpath = getImg "greencircle.png"
+                    | (x, y) `elem` pathInRange = getImg "greencircle.png"
+                    -- | (x, y) `elem` testpath = getImg "greencircle.png"
                     | otherwise              = Blank
                 cursorPicture
                     | (x, y) == mouse = getImg "cursor.png"
@@ -98,6 +104,11 @@ drawGame (C.Client res world mouse selected (sx, sy)) = return . translate sx sy
         getImg  = R.drawImage res
         (w, h) = snd (A.bounds gamemap)
 
+        pathInRange :: [Position]
+        pathInRange
+            | isNothing selected = []
+            | otherwise = map snd . filter (\(c,_) -> c >= 0) $ pathWithAp world (fromJust selected) testpath
+
         testpath :: [Position]
         testpath = fromMaybe [] $ selected >>= \u -> findPath world (U.position u) mouse
 
@@ -117,6 +128,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
+
     (gw, dead) <- A.action client selection m
     -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
     return client { C.gameworld = gw, C.selectedUnit = Nothing }

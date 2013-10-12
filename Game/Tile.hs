@@ -6,7 +6,7 @@ import Game.TypeClasses
 data Tile = BasicTile | BlockTile deriving (Eq, Ord, Show)
 
 tileAp :: Tile -> Maybe Int
-tileAp BasicTile = Just 1
+tileAp BasicTile = Just 2
 tileAp BlockTile = Nothing
 
 tileBlocking :: Tile -> Bool
