@@ -21,9 +21,18 @@ data GameWorld = GameWorld { gamemap :: Map
 
 initialGameWorld :: IO GameWorld
 initialGameWorld = GameWorld
-                <$> return (blankMap 15 15)
+                <$> return mappi
                 <*> initialUnits
                 <*> return 0
+  where
+    mappi = convertMap 6 6 testmap
+
+    testmap = concat [ "......"
+                     , "...##."
+                     , "....#."
+                     , ".####."
+                     , "......"
+                     , "......" ]
 
 -- | Luo tyhjän pelikentän
 blankMap :: Int -> Int -> Map
