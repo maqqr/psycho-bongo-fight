@@ -8,3 +8,4 @@ Required libraries
  * Repa
  * https://github.com/Twinside/Juicy.Pixels
  * https://github.com/TomMD/JuicyPixels-repa
+ * Data.Graph.AStar
