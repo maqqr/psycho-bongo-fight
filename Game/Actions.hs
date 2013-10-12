@@ -6,6 +6,7 @@ import Game.Position (Position)
 import Game.Tile (Tile, tileAttBonus, tileDefBonus)
 import System.Random (randomRIO)
 import Data.Maybe (isNothing)
+import Control.Monad
 
 import Game.Client (Client(..))
 import Game.Resources (Resources(..), GameSound)
