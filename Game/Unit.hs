@@ -52,7 +52,7 @@ deathSound (Unit _ _ _ _ _ _ 0 _) = R.BearDie
 deathSound (Unit _ _ _ _ _ _ 1 _) = R.PirateDie
 
 
-data TraitType = BasicTrait | SlashWeapon | StabWeapon | BluntWeapon | LeatherArmor | MailArmor | PlateArmor deriving (Show, Eq)
+data TraitType = BasicTrait | StrongTrait | WeakTrait deriving (Show, Eq)
 
 data Trait = Trait { traitAp :: Maybe Int
                    , traitPp :: Unit -> Float
@@ -85,10 +85,17 @@ traitDescription _ = "Joku treitti"
 applyCombatTrait :: Trait -> Unit -> Float
 applyCombatTrait = traitPp
 
-basicTrait :: Trait
-basicTrait = Trait Nothing ppFunc BasicTrait Nothing
-  where ppFunc u = if any (\t -> traitType t == BasicTrait) (traits u) then 0 else 10
-
 -- | Palauttaa ekan liukuluvun, jos yksiköllä on annettu trait, muuten jälkimmäisen
 ifHasTrait :: Unit -> Trait -> Float -> Float -> Float
 ifHasTrait u t f1 f2 = if t `elem` traits u then f1 else f2
+
+basicTrait :: Trait
+basicTrait = Trait Nothing ppFunc BasicTrait Nothing
+  where ppFunc u = ifHasTrait u basicTrait 0.0 10.0
+
+strongTrait :: Trait
+strongTrait = Trait Nothing (const 10) StrongTrait Nothing
+
+weakTrait :: Trait
+weakTrait = Trait Nothing (const (-10)) WeakTrait Nothing
+
