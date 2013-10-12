@@ -4,6 +4,7 @@ import Data.UUID
 import Data.UUID.V4
 import Game.Position
 import Game.TypeClasses
+import qualified Game.Resources as R
 
 data Unit = Unit { uuid :: UUID
                  , name :: String
@@ -32,6 +33,9 @@ teamImage (Unit _ _ _ _ _ _ 1 _) = "pirate"
 maxFrames :: Unit -> Int
 maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
 maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
+
+moveSound :: Unit -> R.GameSound
+moveSound _ = R.BearMove
 
 data TraitType = BasicTrait | SuperTrait deriving (Show, Eq)
 
