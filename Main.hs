@@ -9,7 +9,6 @@ import Control.Monad
 import Game.Position
 import qualified Game.Client as C
 import qualified Game.GameWorld as G
-import qualified Game.Tile as T
 import qualified Game.Resources as R
 import qualified Game.TypeClasses as TC
 
@@ -17,6 +16,12 @@ import qualified Data.Set as S
 import Data.Graph.AStar
 
 {- Simon muistiinpanot:
+
+reitinlaskuun:
+ [(Int, Position)] polku jossa Int kuvaa paljonko AP jälellä
+  jos siihen liikuttaisiin, sen avulla voi visualisoida
+  keltaisilla palloilla milloin liikutaan sen verran ettei
+  voi lyödä enää, ja vihreillä voi lyödä vielä
 
 -}
 
@@ -42,8 +47,7 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
         -- | Pisteen heuristinen etäisyys maaliin
         heuristicDistance :: Position -> Position -> Int
-        heuristicDistance (gx, gy) (px, py) = floor . sqrt . fromIntegral $ (gx-px)^2 + (gy-py)^2
-
+        heuristicDistance (gx, gy) (px, py) = floor $ sqrt (fi (gx-px)**2.0 + fi (gy-py)**2.0 :: Double)
 
 
 -- | Piirtää pelitilanteen
@@ -83,7 +87,7 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _) = do
     where
         gamemap = G.gamemap gameworld
 
-handleEvent (EventKey (MouseButton LeftButton) Down modf mouse) client = do
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client = do
     putStrLn $ "Mouse click " ++ show mouse
     return client
 
