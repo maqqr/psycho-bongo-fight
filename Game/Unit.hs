@@ -29,16 +29,23 @@ instance Drawable Unit where
 teamImage :: Unit -> String
 teamImage (Unit _ _ _ _ _ _ 0 _) = "bear"
 teamImage (Unit _ _ _ _ _ _ 1 _) = "pirate"
+teamImage (Unit _ _ _ _ _ _ 2 _) = "ninja"
 
 maxFrames :: Unit -> Int
 maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
 maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 
 moveSound :: Unit -> R.GameSound
-moveSound _ = R.BearMove
+moveSound (Unit _ _ _ _ _ _ 0 _) = R.BearMove
+moveSound (Unit _ _ _ _ _ _ 1 _) = R.PirateMove
 
 attackSound :: Unit -> R.GameSound
-attackSound _ = R.BearAttack
+attackSound (Unit _ _ _ _ _ _ 0 _) = R.BearAttack
+attackSound (Unit _ _ _ _ _ _ 1 _) = R.PirateAttack
+
+selectSound :: Unit -> R.GameSound
+selectSound (Unit _ _ _ _ _ _ 0 _) = R.BearSelect
+selectSound (Unit _ _ _ _ _ _ 1 _) = R.PirateSelect
 
 deathSound :: Unit -> R.GameSound
 deathSound _ = R.BearDie

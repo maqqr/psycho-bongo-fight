@@ -129,7 +129,11 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (no unit) " ++ show mouse
-    return client { C.selectedUnit = G.getUnitAt gameworld m }
+    case G.getUnitAt gameworld m of
+        Just unit -> do
+            playSfx client (U.selectSound unit)
+            return client { C.selectedUnit = Just unit }
+        Nothing -> return client
 
 -- Scrollaus nuolinäppäimillä
 handleEvent (EventKey (SpecialKey key) Down _ _) client = do

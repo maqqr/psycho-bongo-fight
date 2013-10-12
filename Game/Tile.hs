@@ -7,7 +7,7 @@ data Tile = BlockTile | GrassTile | TreeTile | MudTile deriving (Eq, Ord, Show)
 
 tileAp :: Tile -> Maybe Int
 tileAp GrassTile = Just 2
-tileAp MudTile   = Just 100
+tileAp MudTile   = Just 3
 tileAp _ = Nothing
 
 tileBlocking :: Tile -> Bool

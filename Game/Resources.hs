@@ -27,14 +27,28 @@ type ImageFilename = String
 type ImageStorage = M.Map ImageFilename Picture
 type ImageRenderer = ImageFilename -> Picture
 
-data GameSound = BongoFight | BGMusic | BearMove | BearAttack | BearDie
+data GameSound = BongoFight
+               | BGMusic
+               | BearMove
+               | BearAttack
+               | BearDie
+               | BearSelect
+               | PirateMove
+               | PirateAttack
+               | PirateDie
+               | PirateSelect
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
     filename BGMusic    = "snd\\bongo-loop.wav"
     filename BearMove   = "snd\\bear-move.wav"
     filename BearAttack = "snd\\bear-attack.wav"
-    filename BearDie    = "snd\\bear-die.wav"
+    filename BearDie    = "snd\\bear-killed.wav"
+    filename BearSelect = "snd\\bear-move.wav"
+    filename PirateMove = "snd\\pirate-move.wav"
+    filename PirateAttack = "snd\\pirate-attack.wav"
+    filename PirateDie  = "snd\\pirate-killed.wav"
+    filename PirateSelect = "snd\\pirate-select.wav"
 
 type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 
