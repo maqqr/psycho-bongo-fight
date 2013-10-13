@@ -15,7 +15,8 @@ data Client = Client {
     selectedUnit :: Maybe U.Unit,
     scroll    :: (Float, Float),
     player    :: Player,
-    others    :: [Player]
+    others    :: [Player],
+    frame     :: Int
 }
 
 playerNum :: Client -> Int
@@ -34,4 +35,5 @@ newClient = Client
          <*> return (-150, 0)
          <*> return (Player "pelaaja" 0)
          <*> return []
+         <*> return 0
 
