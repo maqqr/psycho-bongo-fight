@@ -174,7 +174,8 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let path = fromMaybe [] $ findPath gameworld (U.position selection) m
     let apPath = pathWithAp gameworld selection path
     let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
-    if any (\(ap,_) -> ap < 0) apPath
+    print apPath
+    if any (\(ap,_) -> ap < 0) apPath || null apPath
         then do
               -- todo: soita tööttäysääni
               let newclient = client { C.gameworld = gameworld, C.selectedUnit = Nothing }
@@ -261,8 +262,9 @@ receiveThread sock box = do
 main :: IO ()
 main = withSocketsDo . R.withSound . connect "127.0.0.1" "44444" $ \(sock, addr) -> do
     putStrLn "Odotetaan pelin alkua..."
-    maybeTeamIndex <- recv sock 1024
-    let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
+    --maybeTeamIndex <- recv sock 1024
+    --let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
+    let teamIndex = BS.pack "0"
     putStr "TEAM INDEX: "
     print teamIndex
     box <- newEmptyMVar :: IO (MVar G.GameWorld)

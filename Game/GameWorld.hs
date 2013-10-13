@@ -36,18 +36,20 @@ initialGameWorld = GameWorld
                 <*> initialUnits
                 <*> return 0
   where
-    mappi = convertMap 10 10 testmap
+    mappi = convertMap 12 12 testmap
 
-    testmap = concat [ "...o......"
-                     , "...##..Y.."
-                     , "....#.o..."
-                     , ".####..OY."
-                     , ".,,.T....."
-                     , ".,,,..Y.O."
-                     , "===,......"
-                     , ",,==......"
-                     , ",,,=....O."
-                     , ".,,=..o..." ]
+    testmap = concat [ "...o........"
+                     , ".#####.Y...."
+                     , ".#...#...o.."
+                     , ".##.##.O..Y."
+                     , ".,,.T......."
+                     , ".,,,..Y....."
+                     , "===,.....o.."
+                     , ",,==........"
+                     , ",,O==,..O..."
+                     , ".,,======,,,"
+                     , "....,,..===="
+                     , ".Y....o....o" ]
 
 -- | Luo tyhjän pelikentän
 blankMap :: Int -> Int -> Map
