@@ -1,8 +1,9 @@
+{-# LANGUAGE RecordWildCards #-}
 module Game.GameWorld where
 
 import Game.Position
 import Game.Tile (Tile(..))
-import Game.Unit (Unit(..), Trait(..), basicUnit, maxFrames, basicTrait)
+import Game.Unit
 import qualified Data.Array as A
 import Data.Maybe (catMaybes, fromMaybe)
 import qualified Data.List as L

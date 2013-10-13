@@ -88,23 +88,38 @@ deathSound (Unit _ _ _ _ _ _ 3 _) = R.RobotDie
 
 data TraitType = BasicTrait | StrongTrait | WeakTrait deriving (Show, Eq)
 
-data Trait = Trait { traitAp :: Maybe Int
-                   , traitPp :: Unit -> Float
-                   , traitType :: TraitType
-                   , duration :: Maybe Int }
+--data Trait = Trait { traitAp :: Maybe Int
+--                   , traitPp :: Unit -> Float
+--                   , traitType :: TraitType
+--                   , duration :: Maybe Int }
+
+data Trait = Trait {
+    traitType :: TraitType,
+    duration :: Maybe Int
+}
+
+traitAp :: Trait -> Maybe Int
+traitAp = undefined
+
+traitPp :: Trait -> Unit -> Float
+traitPp = undefined
 
 instance Binary Trait where
   put Trait{..} = do
-    put traitAp
-    put traitPp
+    --put traitAp
+    --put traitPp
     put traitType
     put duration
   get = do
-    traitAp <- get
-    traitPp <- get
+    --traitAp <- get
+    --traitPp <- get
     traitType <- get
     duration <- get
     return Trait{..}
+
+instance Binary TraitType where
+    put x = undefined
+    get = undefined
 
 instance Show Trait where
     show = traitName
@@ -136,13 +151,13 @@ applyCombatTrait = traitPp
 ifHasTrait :: Unit -> Trait -> Float -> Float -> Float
 ifHasTrait u t f1 f2 = if t `elem` traits u then f1 else f2
 
-basicTrait :: Trait
-basicTrait = Trait Nothing ppFunc BasicTrait Nothing
-  where ppFunc u = ifHasTrait u basicTrait 0.0 10.0
+--basicTrait :: Trait
+--basicTrait = Trait Nothing ppFunc BasicTrait Nothing
+--  where ppFunc u = ifHasTrait u basicTrait 0.0 10.0
 
-strongTrait :: Trait
-strongTrait = Trait Nothing (const 10) StrongTrait Nothing
+--strongTrait :: Trait
+--strongTrait = Trait Nothing (const 10) StrongTrait Nothing
 
-weakTrait :: Trait
-weakTrait = Trait Nothing (const (-10)) WeakTrait Nothing
+--weakTrait :: Trait
+--weakTrait = Trait Nothing (const (-10)) WeakTrait Nothing
 
