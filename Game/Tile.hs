@@ -1,5 +1,6 @@
 module Game.Tile where
 
+import Data.Binary
 import Data.Maybe (isNothing)
 import Game.TypeClasses
 
@@ -10,7 +11,11 @@ data Tile = BlockTile
           | RockTile
           | Rock2Tile
           | WaterTile
-          | MudTile deriving (Eq, Ord, Show)
+          | MudTile deriving (Eq, Ord, Show, Enum)
+
+instance Binary Tile where
+    put = putWord8 . fromIntegral . fromEnum
+    get = getWord8 >>= \t -> return . toEnum $ fromIntegral t
 
 tileAp :: Tile -> Maybe Int
 tileAp BlockTile = Nothing

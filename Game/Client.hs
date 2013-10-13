@@ -1,5 +1,7 @@
 module Game.Client where
 
+import Network.Simple.TCP
+import Control.Concurrent.MVar
 import Control.Applicative
 import Game.Position
 import Game.Player
@@ -16,7 +18,9 @@ data Client = Client {
     scroll    :: (Float, Float),
     player    :: Player,
     others    :: [Player],
-    frame     :: Int
+    frame     :: Int,
+    box       :: MVar G.GameWorld,
+    socket    :: Socket
 }
 
 playerNum :: Client -> Int
@@ -26,8 +30,8 @@ myTurn :: Client -> Bool
 myTurn client = G.turn (gameworld client) `mod` playerNum client == teamIndex (player client)
 
 -- | Luo uuden clientin ja lataa sille resurssit
-newClient :: IO Client
-newClient = Client
+newClient :: MVar G.GameWorld -> Socket -> IO Client
+newClient box sock = Client
          <$> R.loadResources
          <*> G.initialGameWorld
          <*> return (0, 0)
@@ -36,4 +40,6 @@ newClient = Client
          <*> return (Player "pelaaja" 0)
          <*> return []
          <*> return 0
+         <*> return box
+         <*> return sock
 
