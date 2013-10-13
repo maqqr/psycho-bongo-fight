@@ -174,7 +174,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let path = fromMaybe [] $ findPath gameworld (U.position selection) m
     let apPath = pathWithAp gameworld selection path
     let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
-    print apPath
+    --print apPath
     if any (\(ap,_) -> ap < 0) apPath || null apPath
         then do
               -- todo: soita tööttäysääni
@@ -221,7 +221,7 @@ handleEvent (EventKey (SpecialKey KeySpace) Down _ _) client = do
 
 -- Scrollaus nuolinäppäimillä
 handleEvent (EventKey (SpecialKey key) Down _ _) client = do
-    putStrLn $ "asdasd" ++ show key
+    --putStrLn $ "asdasd" ++ show key
     return client { C.scroll = newScroll }
     where
         (ox, oy) = C.scroll client
@@ -253,7 +253,7 @@ receiveThread sock box = do
     dataa <- recv sock (1024 * 4)
     case dataa of
         Just dataa' -> do
-            putStrLn "DATAAA"
+            putStrLn "Dataa vastaanotettu."
             putMVar box (decode . LBS.pack . BS.unpack $ dataa')
             receiveThread sock box
         Nothing -> putStrLn "Connection lost."
@@ -262,9 +262,9 @@ receiveThread sock box = do
 main :: IO ()
 main = withSocketsDo . R.withSound . connect "127.0.0.1" "44444" $ \(sock, addr) -> do
     putStrLn "Odotetaan pelin alkua..."
-    --maybeTeamIndex <- recv sock 1024
-    --let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
-    let teamIndex = BS.pack "0"
+    maybeTeamIndex <- recv sock 1024
+    let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
+    --let teamIndex = BS.pack "0"
     putStr "TEAM INDEX: "
     print teamIndex
     box <- newEmptyMVar :: IO (MVar G.GameWorld)

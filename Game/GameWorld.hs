@@ -73,7 +73,8 @@ convertMap width height = A.listArray ((0,0), (width-1, height-1)) . map charToT
         charToTile _   = GrassTile
 
 initialUnits :: IO [[Unit]]
-initialUnits = mapM sequence [[basicUnit "Matti" (0, 0) 0], [basicUnit "Esko" (1, 1) 1]]
+initialUnits = mapM sequence [[basicUnit "Matti" (0, 0) 0, basicUnit "Esko" (1, 0) 0, basicUnit "Jussi" (0, 1) 0],
+                              [basicUnit "Yarr" (11, 11) 1, basicUnit "Yarhar" (10, 11) 1, basicUnit "Argh" (11, 10) 1]]
 
 -- | Päivittää pelimaailman yksikköä
 updateUnit :: GameWorld -> Unit -> GameWorld

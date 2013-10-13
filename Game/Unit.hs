@@ -43,7 +43,7 @@ instance Eq Unit where
     u1 == u2 = uuid u1 == uuid u2
 
 instance Describable Unit where
-    describe u = "Name: "++name u++"\nPP: "++show (pp u)++"\nAP: "++show (ap u)++ unlines (map show (traits u))
+    describe u = "Name: "++name u++"\nPP: "++show (floor (pp u))++"\nAP: "++show (ap u)++ unlines (map show (traits u))
 
 instance Drawable Unit where
     filename unit = "characters/"++teamImage unit++show (animFrame unit)++".png"
