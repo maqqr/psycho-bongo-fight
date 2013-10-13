@@ -29,6 +29,9 @@ playerNum client = 1 + length (others client)
 myTurn :: Client -> Bool
 myTurn client = G.turn (gameworld client) `mod` playerNum client == teamIndex (player client)
 
+myTeam :: Client -> Int
+myTeam client = teamIndex (player client)
+
 -- | Luo uuden clientin ja lataa sille resurssit
 newClient :: MVar G.GameWorld -> Socket -> Int -> IO Client
 newClient box sock idx = Client

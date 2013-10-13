@@ -197,7 +197,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll self others _ _ _) = do
     let m = convertMouse scroll mouse
-    case G.getUnitAt gameworld m of
+    case G.getUnit gameworld (\u -> U.position u == m && U.team u == C.myTeam client && C.myTurn client) of
         Just unit -> do
             playSfx client (U.selectSound unit)
             return client { C.selectedUnit = Just unit }
@@ -208,9 +208,12 @@ handleEvent (EventKey (Char 'r') Down _ _) client = return client { C.gameworld 
 
 -- Vuoron vaihto välilyönnillä
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) client = do
-    let newworld = nextTurn . G.resetAps . C.gameworld $ client
-    sendWorld (C.socket client) newworld
-    return client { C.gameworld = newworld }
+    if C.myTurn client then do
+        let newworld = nextTurn . G.resetAps . C.gameworld $ client
+        sendWorld (C.socket client) newworld
+        return client { C.gameworld = newworld }
+        else
+            return client
     where
         nextTurn :: G.GameWorld -> G.GameWorld
         nextTurn w = w { G.turn = succ (G.turn w) }
