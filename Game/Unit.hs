@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Game.Unit where
 
 import Data.UUID
@@ -80,8 +81,8 @@ selectSound (Unit _ _ _ _ _ _ 3 _) = R.RobotSelect
 deathSound :: Unit -> R.GameSound
 deathSound (Unit _ _ _ _ _ _ 0 _) = R.BearDie
 deathSound (Unit _ _ _ _ _ _ 1 _) = R.PirateDie
-deathSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaDeath
-deathSound (Unit _ _ _ _ _ _ 3 _) = R.RobotDeath
+deathSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaDie
+deathSound (Unit _ _ _ _ _ _ 3 _) = R.RobotDie
 
 
 
