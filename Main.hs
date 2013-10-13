@@ -188,13 +188,16 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let apPath = pathWithAp gameworld selection path
     let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
     if any (\(ap,_) -> ap < 0) apPath
-        then
+        then do
               -- todo: soita tööttäysääni
-              return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
+              let newclient = client { C.gameworld = gameworld, C.selectedUnit = Nothing }
+              return newclient
         else do
               (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m apPath
               playDeath dead -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
-              return client { C.gameworld = gw, C.selectedUnit = Nothing }
+              let newclient = client { C.gameworld = gw, C.selectedUnit = Nothing }
+              sendWorld (C.socket client) (C.gameworld newclient)
+              return newclient
     where
         playDeath :: [U.Unit] -> IO ()
         playDeath []    = return ()
