@@ -48,7 +48,7 @@ data GameSound = BongoFight
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
-    filename BGMusic    = "snd\\bongo-loop.wav"
+    filename BGMusic    = "snd\\goat-music.wav"
     filename BearMove   = "snd\\bear-move.wav"
     filename BearAttack = "snd\\bear-attack.wav"
     filename BearDie    = "snd\\bear-killed.wav"
