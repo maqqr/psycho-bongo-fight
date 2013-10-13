@@ -29,15 +29,7 @@ import qualified Game.Actions as A
 import qualified Data.Set as S
 import Data.Graph.AStar
 
-{- Simon muistiinpanot:
 
-reitinlaskuun:
- [(Int, Position)] polku jossa Int kuvaa paljonko AP jälellä
-  jos siihen liikuttaisiin, sen avulla voi visualisoida
-  keltaisilla palloilla milloin liikutaan sen verran ettei
-  voi lyödä enää, ja vihreillä voi lyödä vielä
-
--}
 pathWithAp :: G.GameWorld -> U.Unit -> [Position] -> [(Int, Position)]
 pathWithAp gw u ps = tail . reverse $ foldl f [(U.ap u, U.position u)] ps
   where
@@ -172,8 +164,6 @@ drawGame client@(C.Client res world mouse selected (sx, sy) self others frameN _
 handleEvent :: Event -> C.Client -> IO C.Client
 handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self others _ _ _) = do
     let m = convertMouse scroll mouse
-    --print $ show mouse ++ show m
-    --when (G.insideMap gamemap m) (print (gamemap ! m))
     return $ client { C.mousePos = m }
     where
         gamemap = G.gamemap gameworld
@@ -181,9 +171,6 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self oth
 -- Klikkaus kun joku yksikkö on valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll self others _ _ _) = do
     let m = convertMouse scroll mouse
-    --putStrLn $ "Mouse click (unit) " ++ show mouse
-    --playSfx client R.BearMove
-
     let path = fromMaybe [] $ findPath gameworld (U.position selection) m
     let apPath = pathWithAp gameworld selection path
     let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
@@ -210,7 +197,6 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
 handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll self others _ _ _) = do
     let m = convertMouse scroll mouse
-    --putStrLn $ "Mouse click (no unit) " ++ show mouse
     case G.getUnitAt gameworld m of
         Just unit -> do
             playSfx client (U.selectSound unit)
