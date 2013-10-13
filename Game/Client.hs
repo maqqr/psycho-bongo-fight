@@ -30,15 +30,15 @@ myTurn :: Client -> Bool
 myTurn client = G.turn (gameworld client) `mod` playerNum client == teamIndex (player client)
 
 -- | Luo uuden clientin ja lataa sille resurssit
-newClient :: MVar G.GameWorld -> Socket -> IO Client
-newClient box sock = Client
+newClient :: MVar G.GameWorld -> Socket -> Int -> IO Client
+newClient box sock idx = Client
          <$> R.loadResources
          <*> G.initialGameWorld
          <*> return (0, 0)
          <*> return Nothing
          <*> return (-150, 0)
-         <*> return (Player "pelaaja" 0)
-         <*> return []
+         <*> return (Player "pelaaja" idx)
+         <*> return [Player "toinen" 3]
          <*> return 0
          <*> return box
          <*> return sock

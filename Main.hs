@@ -1,7 +1,6 @@
-{-# LANGUAGE CPP #-}
 module Main where
 
-#define SOUND
+-- #define SOUND
 
 import Data.Array ((!))
 import Data.Maybe (fromMaybe, isNothing, fromJust)
@@ -189,7 +188,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
     let apPath = pathWithAp gameworld selection path
     let unit = selection { U.ap = if L.null apPath then U.ap selection else fst . last $ apPath } -- valittu yksikkö jolta vähennetty AP
     if any (\(ap,_) -> ap < 0) apPath
-        then do
+        then
               -- todo: soita tööttäysääni
               return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
         else do
@@ -246,9 +245,7 @@ handleEvent _ client = return client
 updateGame :: (Float -> C.Client -> IO C.Client)
 updateGame dt client = do
     ww <- tryTakeMVar (C.box client)
-    let networkworld = case ww of
-                    Just w  -> w
-                    Nothing -> C.gameworld client
+    let networkworld = fromMaybe (C.gameworld client) ww
     return client { C.gameworld = G.animateUnits networkworld, C.frame = mod (C.frame client + 1) 1000 }
 
 playSfx :: C.Client -> R.GameSound -> IO ()
@@ -266,16 +263,19 @@ receiveThread sock box = do
             putStrLn "DATAAA"
             putMVar box (decode . LBS.pack . BS.unpack $ dataa')
             receiveThread sock box
-        Nothing -> do
-            putStrLn "Connection lost."
+        Nothing -> putStrLn "Connection lost."
 
 
 main :: IO ()
-main = withSocketsDo . R.withSound . connect "www.btlracing.fi" "44444" $ \(sock, addr) -> do
-    putStrLn "recv test"
+main = withSocketsDo . R.withSound . connect "127.0.0.1" "44444" $ \(sock, addr) -> do
+    putStrLn "Odotetaan pelin alkua..."
+    maybeTeamIndex <- recv sock 1024
+    let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
+    putStr "TEAM INDEX: "
+    print teamIndex
     box <- newEmptyMVar :: IO (MVar G.GameWorld)
     forkIO $ receiveThread sock box
-    client <- C.newClient box sock
+    client <- C.newClient box sock (read (BS.unpack teamIndex) :: Int)
     playSfx client R.BongoFight
     (R.playSound . C.resources $ client) R.BGMusic 1.0 True
     playIO
