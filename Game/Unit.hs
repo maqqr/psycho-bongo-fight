@@ -19,7 +19,7 @@ data Unit = Unit { uuid :: UUID
             } deriving (Show)
 
 instance Binary Unit where
-  put Unit{..} = do 
+  put Unit{..} = do
     put uuid
     put name
     put ap
@@ -53,6 +53,7 @@ teamImage :: Unit -> String
 teamImage (Unit _ _ _ _ _ _ 0 _) = "bear"
 teamImage (Unit _ _ _ _ _ _ 1 _) = "pirate"
 teamImage (Unit _ _ _ _ _ _ 2 _) = "ninja"
+teamImage (Unit _ _ _ _ _ _ 3 _) = "robot"
 
 maxFrames :: Unit -> Int
 maxFrames (Unit _ _ _ _ _ _ 0 _) = 2
@@ -61,18 +62,28 @@ maxFrames (Unit _ _ _ _ _ _ 1 _) = 2
 moveSound :: Unit -> R.GameSound
 moveSound (Unit _ _ _ _ _ _ 0 _) = R.BearMove
 moveSound (Unit _ _ _ _ _ _ 1 _) = R.PirateMove
+moveSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaMove
+moveSound (Unit _ _ _ _ _ _ 3 _) = R.RobotMove
+
 
 attackSound :: Unit -> R.GameSound
 attackSound (Unit _ _ _ _ _ _ 0 _) = R.BearAttack
 attackSound (Unit _ _ _ _ _ _ 1 _) = R.PirateAttack
+attackSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaAttack
+attackSound (Unit _ _ _ _ _ _ 3 _) = R.RobotAttack
 
 selectSound :: Unit -> R.GameSound
 selectSound (Unit _ _ _ _ _ _ 0 _) = R.BearSelect
 selectSound (Unit _ _ _ _ _ _ 1 _) = R.PirateSelect
+selectSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaSelect
+selectSound (Unit _ _ _ _ _ _ 3 _) = R.RobotSelect
 
 deathSound :: Unit -> R.GameSound
 deathSound (Unit _ _ _ _ _ _ 0 _) = R.BearDie
 deathSound (Unit _ _ _ _ _ _ 1 _) = R.PirateDie
+deathSound (Unit _ _ _ _ _ _ 2 _) = R.NinjaDie
+deathSound (Unit _ _ _ _ _ _ 3 _) = R.RobotDie
+
 
 
 data TraitType = BasicTrait | StrongTrait | WeakTrait deriving (Show, Eq)
@@ -104,7 +115,7 @@ instance Binary Trait where
     --traitPp <- get
     traitType <- get
     duration <- get
-    return Trait{..} 
+    return Trait{..}
 
 instance Binary TraitType where
     put x = undefined

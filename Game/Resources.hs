@@ -37,6 +37,14 @@ data GameSound = BongoFight
                | PirateAttack
                | PirateDie
                | PirateSelect
+               | RobotMove
+               | RobotAttack
+               | RobotDie
+               | RobotSelect
+               | NinjaMove
+               | NinjaAttack
+               | NinjaDie
+               | NinjaSelect
 
 instance Snd.Playable GameSound where
     filename BongoFight = "snd\\psycho-bongo-fight.wav"
@@ -49,6 +57,16 @@ instance Snd.Playable GameSound where
     filename PirateAttack = "snd\\pirate-attack.wav"
     filename PirateDie  = "snd\\pirate-killed.wav"
     filename PirateSelect = "snd\\pirate-select.wav"
+    filename RobotMove = "snd\\robot-move.wav"
+    filename RobotAttack = "snd\\robot-attack.wav"
+    filename RobotDie  = "snd\\robot-killed.wav"
+    filename RobotSelect = "snd\\robot-select.wav"
+    filename NinjaMove = "snd\\ninja-move.wav"
+    filename NinjaAttack = "snd\\ninja-attack.wav"
+    filename NinjaDie  = "snd\\ninja-killed.wav"
+    filename NinjaSelect = "snd\\ninja-select.wav"
+
+
 
 type SoundPlayer = GameSound -> Float -> Bool -> IO ()
 
