@@ -91,7 +91,7 @@ drawGame client@(C.Client res world mouse selected (sx, sy) self others frameN _
         bgSelected = case selected of
                        Nothing -> Blank
                        Just u -> if U.team u == 0 then pictures bgBears else Blank
-        bgBears = [translate x y . rotate (fromIntegral $ mod frameN 360) . scale 0.15 0.15 $ getImg "karhu.png" | x <- [-800,-700..800], y <- [-700,-600..700]]
+        bgBears = [translate x y . rotate (fromIntegral $ mod frameN 360) . scale 0.15 0.15 $ getImg "kuningaskarhu.png" | x <- [-800,-700..800], y <- [-700,-600..700]]
 
         bgColors = blendColors . blendColors . blendColors . blendColors . blendColors $ blendColors bgBasicColors -- tähän joku hieno funktio?
         bgBasicColors = [rose, violet, azure, aquamarine, chartreuse, orange]
