@@ -5,6 +5,7 @@ import Data.UUID.V4
 import Game.Position
 import Game.TypeClasses
 import qualified Game.Resources as R
+import Data.Binary
 
 data Unit = Unit { uuid :: UUID
                  , name :: String
@@ -15,6 +16,27 @@ data Unit = Unit { uuid :: UUID
                  , team :: Int
                  , animFrame :: Int
             } deriving (Show)
+
+instance Binary Unit where
+  put Unit{..} = do 
+    put uuid
+    put name
+    put ap
+    put pp
+    put traits
+    put position
+    put team
+    put animFrame
+  get = do
+    uuid <- get
+    name <- get
+    ap <- get
+    pp <- get
+    traits <- get
+    position <- get
+    team <- get
+    animFrame <- get
+    return Unit{..}
 
 instance Eq Unit where
     u1 == u2 = uuid u1 == uuid u2
@@ -58,6 +80,19 @@ data Trait = Trait { traitAp :: Maybe Int
                    , traitPp :: Unit -> Float
                    , traitType :: TraitType
                    , duration :: Maybe Int }
+
+instance Binary Trait where
+  put Trait{..} = do
+    put traitAp
+    put traitPp
+    put traitType
+    put duration
+  get = do
+    traitAp <- get
+    traitPp <- get
+    traitType <- get
+    duration <- get
+    return Trait{..} 
 
 instance Show Trait where
     show = traitName
