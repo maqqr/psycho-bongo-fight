@@ -220,10 +220,10 @@ handleEvent (EventKey (Char 'r') Down _ _) client = return client { C.gameworld 
 
 -- Vuoron vaihto välilyönnillä
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) client = do
+    let newworld = nextTurn . G.resetAps . C.gameworld $ client
+    sendWorld (C.socket client) newworld
     return client { C.gameworld = newworld }
     where
-        newworld = nextTurn . G.resetAps . C.gameworld $ client
-
         nextTurn :: G.GameWorld -> G.GameWorld
         nextTurn w = w { G.turn = succ (G.turn w) }
 
@@ -254,9 +254,9 @@ updateGame dt client = do
 playSfx :: C.Client -> R.GameSound -> IO ()
 playSfx client s = (R.playSound . C.resources $ client) s 1.0 False
 
-sendWorld :: C.Client -> IO ()
-sendWorld client =
-    send (C.socket client) . BS.pack . LBS.unpack . encode $ C.gameworld client
+sendWorld :: Socket -> G.GameWorld -> IO ()
+sendWorld sock world =
+    send sock . BS.pack . LBS.unpack . encode $ world
 
 receiveThread :: Socket -> MVar G.GameWorld -> IO ()
 receiveThread sock box = do
