@@ -7,9 +7,9 @@ import qualified Data.Array as A
 import Data.Maybe (catMaybes, fromMaybe)
 import qualified Data.List as L
 import Control.Applicative
+import Data.Binary
 
-
-type Map = A.Array (Int, Int) Tile
+type Map = A.Array (Int, Int) Tile 
 
 -- laitoin map :: Map nimeksi gamemap
 -- jotta ei tule konfliktia Prelude.mapin kanssa
@@ -17,6 +17,16 @@ data GameWorld = GameWorld { gamemap :: Map
                            , units :: [[Unit]]
                            , turn :: Int
                  } deriving (Show)
+instance Binary GameWorld where
+  put GameWorld{..} = do
+    put gamemap
+    put units
+    put turn
+  get = do
+    gamemap <- get
+    units <- get
+    turn <- get
+    return GameWorld{..}
 
 
 initialGameWorld :: IO GameWorld

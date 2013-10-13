@@ -8,10 +8,12 @@ import Data.Maybe (fromMaybe, isNothing, fromJust)
 import qualified Data.Array as A
 import qualified Data.List as L
 import qualified Data.Map as M
+import qualified Data.ByteString.Char8 as BS
 import Data.Tuple (swap)
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
 import Control.Concurrent
+import Network.Simple.TCP
 
 import Game.Position
 import qualified Game.Client as C
@@ -75,9 +77,30 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame client@(C.Client res world mouse selected (sx, sy) self others) =
-    return $ pictures [translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
+drawGame client@(C.Client res world mouse selected (sx, sy) self others frameN) =
+    return $ pictures [background, translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
     where
+        -- <paskaa>
+        background :: Picture
+        background = pictures [bgFlasher, bgMagicSquare, bgSelected]
+        bgFlasher = color (modIndex bgColors frameN) $ rectangleSolid 750 500
+        bgMagicSquare = color (modIndex bgBasicColors frameN) . rotate (fromIntegral $ mod frameN 360) $ rectangleSolid (fromIntegral frameN) (fromIntegral frameN)
+        bgSelected = case selected of
+                       Nothing -> Blank
+                       Just u -> if U.team u == 0 then pictures bgBears else Blank
+        bgBears = [translate x y . rotate (fromIntegral $ mod frameN 360) . scale 0.15 0.15 $ getImg "karhu.png" | x <- [-800,-700..800], y <- [-700,-600..700]]
+
+        bgColors = blendColors . blendColors . blendColors $ blendColors bgBasicColors -- tähän joku hieno funktio?
+        bgBasicColors = [rose, violet, azure, aquamarine, chartreuse, orange]
+        bgColor = makeColor8 (mod (frameN + 1) 255) (mod (frameN + 85) 255) (mod (frameN + 170) 255) 255
+        modIndex ls i = ls L.!! mod i (length ls)
+        -- </paskaa>
+
+        blendColors :: [Color] -> [Color]
+        blendColors [] = []
+        blendColors (c:[]) = [c]
+        blendColors (c:d:cs) = c : mixColors 0.5 0.5 c d : blendColors (d:cs)
+
         drawTiles :: [Picture]
         drawTiles = [uncurry translate (toIsom (x, y)) . drawTile $ (y, x) | x <- [w, w-1 .. 0], y <- [0 .. h]]
 
@@ -145,7 +168,7 @@ drawGame client@(C.Client res world mouse selected (sx, sy) self others) =
 
 -- | Tapahtumien käsittey
 handleEvent :: Event -> C.Client -> IO C.Client
-handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self others) = do
+handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self others _) = do
     let m = convertMouse scroll mouse
     --print $ show mouse ++ show m
     --when (G.insideMap gamemap m) (print (gamemap ! m))
@@ -154,7 +177,7 @@ handleEvent (EventMotion mouse) client@(C.Client _ gameworld _ _ scroll self oth
         gamemap = G.gamemap gameworld
 
 -- Klikkaus kun joku yksikkö on valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll self others) = do
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ (Just selection) scroll self others _) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (unit) " ++ show mouse
     --playSfx client R.BearMove
@@ -167,7 +190,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
               -- todo: soita tööttäysääni
               return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
         else do
-              (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m
+              (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m apPath
               playDeath dead -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
               return client { C.gameworld = gw, C.selectedUnit = Nothing }
     where
@@ -180,7 +203,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
             playDeath xs
 
 -- Klikkaus kun mitään hahmoa ei ole valittuna
-handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll self others) = do
+handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ gameworld _ Nothing scroll self others _) = do
     let m = convertMouse scroll mouse
     --putStrLn $ "Mouse click (no unit) " ++ show mouse
     case G.getUnitAt gameworld m of
@@ -219,13 +242,18 @@ handleEvent _ client = return client
 
 updateGame :: (Float -> C.Client -> IO C.Client)
 updateGame dt client = do
-    return client { C.gameworld = G.animateUnits (C.gameworld client) }
+    return client { C.gameworld = G.animateUnits (C.gameworld client), C.frame = mod (C.frame client + 1) 1000 }
 
 playSfx :: C.Client -> R.GameSound -> IO ()
 playSfx client s = (R.playSound . C.resources $ client) s 1.0 False
 
 main :: IO ()
-main = R.withSound $ do
+main = withSocketsDo . R.withSound . connect "www.btlracing.fi" "44444" $ \(sock, addr) -> do
+    putStrLn "recv test"
+    send sock (BS.pack "paskaa")
+    forkIO $ do
+        dataa <- recv sock 1024
+        putStrLn $ "DATAAA" ++ show dataa
     client <- C.newClient
     playSfx client R.BongoFight
     (R.playSound . C.resources $ client) R.BGMusic 1.0 True
