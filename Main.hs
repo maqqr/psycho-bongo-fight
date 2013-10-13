@@ -8,10 +8,12 @@ import Data.Maybe (fromMaybe, isNothing, fromJust)
 import qualified Data.Array as A
 import qualified Data.List as L
 import qualified Data.Map as M
+import qualified Data.ByteString.Char8 as BS
 import Data.Tuple (swap)
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
 import Control.Concurrent
+import Network.Simple.TCP
 
 import Game.Position
 import qualified Game.Client as C
@@ -225,7 +227,12 @@ playSfx :: C.Client -> R.GameSound -> IO ()
 playSfx client s = (R.playSound . C.resources $ client) s 1.0 False
 
 main :: IO ()
-main = R.withSound $ do
+main = withSocketsDo . R.withSound . connect "www.btlracing.fi" "44444" $ \(sock, addr) -> do
+    putStrLn "recv test"
+    send sock (BS.pack "paskaa")
+    forkIO $ do
+        dataa <- recv sock 1024
+        putStrLn $ "DATAAA" ++ show dataa
     client <- C.newClient
     playSfx client R.BongoFight
     (R.playSound . C.resources $ client) R.BGMusic 1.0 True
