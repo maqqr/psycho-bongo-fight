@@ -18,6 +18,12 @@ data Client = Client {
     others    :: [Player]
 }
 
+playerNum :: Client -> Int
+playerNum client = 1 + length (others client)
+
+myTurn :: Client -> Bool
+myTurn client = G.turn (gameworld client) `mod` playerNum client == teamIndex (player client)
+
 -- | Luo uuden clientin ja lataa sille resurssit
 newClient :: IO Client
 newClient = Client
