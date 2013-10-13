@@ -4,8 +4,12 @@
 
 #include <stdio.h>
 #include <bass.h>
-#define DLLEXPORT __declspec(dllexport)
 
+#ifdef _WIN32
+#define DLLEXPORT __declspec(dllexport)
+#else
+#define DLLEXPORT
+#endif
 
 #ifdef DEBUG
 inline static int debugprintf(const char *format, ...) {

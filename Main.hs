@@ -75,7 +75,8 @@ findPath world start end = aStar neighbours distance (heuristicDistance end) (==
 
 -- | Piirtää pelitilanteen
 drawGame :: C.Client -> IO Picture
-drawGame (C.Client res world mouse selected (sx, sy) self others frameN) = return $ pictures [background, translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
+drawGame client@(C.Client res world mouse selected (sx, sy) self others frameN) =
+    return $ pictures [background, translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
     where
         background :: Picture
         background = pictures [bgFlasher, bgMagicSquare]
@@ -122,7 +123,12 @@ drawGame (C.Client res world mouse selected (sx, sy) self others frameN) = retur
                     | otherwise   = red
 
         turnInfo :: Picture
-        turnInfo = translate (-200) 250 . scale 0.3 0.3 . color red . text $ "Turn: " ++ show currentTurn
+        turnInfo = pictures [turnText, turnText2]
+            where
+                turnText  = translate (-200) 250 . scale 0.3 0.3 . color red . text $ "Turn: " ++ show currentTurn
+                turnText2
+                    | C.myTurn client = translate (-200) 200 . scale 0.3 0.3 . color green $ text "Your turn"
+                    | otherwise       = Blank
 
         guiElements :: Maybe U.Unit -> Picture
         guiElements Nothing = Blank
@@ -199,8 +205,18 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
 -- Testaa AP:n palauttamista oletusarvoihin
 handleEvent (EventKey (Char 'r') Down _ _) client = return client { C.gameworld = G.resetAps (C.gameworld client) }
 
+-- Vuoron vaihto välilyönnillä
+handleEvent (EventKey (SpecialKey KeySpace) Down _ _) client = do
+    return client { C.gameworld = newworld }
+    where
+        newworld = nextTurn . G.resetAps . C.gameworld $ client
+
+        nextTurn :: G.GameWorld -> G.GameWorld
+        nextTurn w = w { G.turn = succ (G.turn w) }
+
 -- Scrollaus nuolinäppäimillä
 handleEvent (EventKey (SpecialKey key) Down _ _) client = do
+    putStrLn $ "asdasd" ++ show key
     return client { C.scroll = newScroll }
     where
         (ox, oy) = C.scroll client
@@ -209,8 +225,9 @@ handleEvent (EventKey (SpecialKey key) Down _ _) client = do
         scrolling KeyRight = (-30,   0)
         scrolling KeyUp    = (  0, -30)
         scrolling KeyDown  = (  0,  30)
+        scrolling _        = (  0,   0)
 
-handleEvent _ game = return game
+handleEvent _ client = return client
 
 
 updateGame :: (Float -> C.Client -> IO C.Client)
