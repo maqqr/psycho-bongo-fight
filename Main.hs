@@ -78,13 +78,21 @@ drawGame :: C.Client -> IO Picture
 drawGame client@(C.Client res world mouse selected (sx, sy) self others frameN) =
     return $ pictures [background, translate sx sy (pictures drawTiles), guiElements (G.getUnitAt world mouse), turnInfo]
     where
+        -- <paskaa>
         background :: Picture
-        background = pictures [bgFlasher, bgMagicSquare]
-        bgFlasher = color (bgColors L.!! mod frameN (length bgColors)) $ rectangleSolid 750 500
-        bgMagicSquare = color (bgBasicColors L.!! mod frameN (length bgBasicColors)) . rotate (fromIntegral $ mod frameN 360) $ rectangleSolid (fromIntegral frameN) (fromIntegral frameN)
+        background = pictures [bgFlasher, bgMagicSquare, bgSelected]
+        bgFlasher = color (modIndex bgColors frameN) $ rectangleSolid 750 500
+        bgMagicSquare = color (modIndex bgBasicColors frameN) . rotate (fromIntegral $ mod frameN 360) $ rectangleSolid (fromIntegral frameN) (fromIntegral frameN)
+        bgSelected = case selected of
+                       Nothing -> Blank
+                       Just u -> if U.team u == 0 then pictures bgBears else Blank
+        bgBears = [translate x y . rotate (fromIntegral $ mod frameN 360) . scale 0.15 0.15 $ getImg "karhu.png" | x <- [-800,-700..800], y <- [-700,-600..700]]
+
         bgColors = blendColors . blendColors . blendColors $ blendColors bgBasicColors -- tähän joku hieno funktio?
         bgBasicColors = [rose, violet, azure, aquamarine, chartreuse, orange]
         bgColor = makeColor8 (mod (frameN + 1) 255) (mod (frameN + 85) 255) (mod (frameN + 170) 255) 255
+        modIndex ls i = ls L.!! mod i (length ls)
+        -- </paskaa>
 
         blendColors :: [Color] -> [Color]
         blendColors [] = []
@@ -180,7 +188,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ mouse) client@(C.Client _ 
               -- todo: soita tööttäysääni
               return client { C.gameworld = gameworld, C.selectedUnit = Nothing }
         else do
-              (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m
+              (gw, dead) <- A.action (client { C.gameworld = gameworld }) unit m apPath
               playDeath dead -- todo: piirrä kuolinanimaatio, jos dead ei oo tyhjä
               return client { C.gameworld = gw, C.selectedUnit = Nothing }
     where

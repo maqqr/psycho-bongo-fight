@@ -14,8 +14,8 @@ import Game.Resources (Resources(..), GameSound)
 playSfx :: Client -> GameSound -> IO ()
 playSfx client s = (playSound . resources $ client) s 1.0 False
 
-action :: Client -> Unit -> Position -> IO (GameWorld, [Unit])
-action cli u pos = case getUnitAt gw pos of
+action :: Client -> Unit -> Position -> [(Int, Position)] -> IO (GameWorld, [Unit])
+action cli u pos path = case getUnitAt gw pos of
                     Nothing -> do
                         playSfx cli (moveSound u)
                         return (move gw u pos, [])
@@ -24,7 +24,9 @@ action cli u pos = case getUnitAt gw pos of
                             return (gw, [])
                             else do
                                 playSfx cli (attackSound u)
-                                smack gw u target
+                                let newPos = if length path > 1 then snd . last $ init path else position u
+                                smack gw (u { position = newPos }) target
+
   where
     gw = gameworld cli
 
