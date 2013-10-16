@@ -281,7 +281,7 @@ main = withSocketsDo $ do
         playSfx client R.BongoFight
         (R.playSound . C.resources $ client) R.BGMusic 1.0 True
         playIO
-            (InWindow "Isometric game" (700, 500) (10, 10))
+            (InWindow "Psycho-bongo-fight" (700, 500) (10, 10))
             black   -- background color (Color)
             30      -- fps (Int)
             client  -- initial game state
