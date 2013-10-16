@@ -260,23 +260,31 @@ receiveThread sock box = do
 
 
 main :: IO ()
-main = withSocketsDo . R.withSound . connect "127.0.0.1" "44444" $ \(sock, addr) -> do
-    putStrLn "Odotetaan pelin alkua..."
-    maybeTeamIndex <- recv sock 1024
-    let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
-    --let teamIndex = BS.pack "0"
-    putStr "TEAM INDEX: "
-    print teamIndex
-    box <- newEmptyMVar :: IO (MVar G.GameWorld)
-    forkIO $ receiveThread sock box
-    client <- C.newClient box sock (read (BS.unpack teamIndex) :: Int)
-    playSfx client R.BongoFight
-    (R.playSound . C.resources $ client) R.BGMusic 1.0 True
-    playIO
-        (InWindow "Isometric game" (700, 500) (10, 10))
-        black   -- background color (Color)
-        30      -- fps (Int)
-        client  -- initial game state
-        drawGame    -- rendering function (game -> IO Picture)
-        handleEvent -- input handler (Event -> game -> IO game)
-        updateGame  -- update function (Float -> game -> IO game)
+main = withSocketsDo $ do
+    putStrLn "Enter nothing for default value."
+    putStr "Server IP (default: localhost): "
+    ip <- getLine
+    putStr "Port (default 44444): "
+    port <- getLine
+    let ip' = if null ip then "127.0.0.1" else ip
+    let port' = if null port then "44444" else port
+    R.withSound . connect ip' port' $ \(sock, addr) -> do
+        putStrLn "Waiting for other player..."
+        maybeTeamIndex <- recv sock 1024
+        let teamIndex = fromMaybe (BS.pack "4") maybeTeamIndex
+        --let teamIndex = BS.pack "0"
+        --putStr "TEAM INDEX: "
+        --print teamIndex
+        box <- newEmptyMVar :: IO (MVar G.GameWorld)
+        forkIO $ receiveThread sock box
+        client <- C.newClient box sock (read (BS.unpack teamIndex) :: Int)
+        playSfx client R.BongoFight
+        (R.playSound . C.resources $ client) R.BGMusic 1.0 True
+        playIO
+            (InWindow "Isometric game" (700, 500) (10, 10))
+            black   -- background color (Color)
+            30      -- fps (Int)
+            client  -- initial game state
+            drawGame    -- rendering function (game -> IO Picture)
+            handleEvent -- input handler (Event -> game -> IO game)
+            updateGame  -- update function (Float -> game -> IO game)

@@ -30,8 +30,14 @@ main = withSocketsDo $ do
     first <- newEmptyMVar :: IO (MVar Socket)
     clients <- newEmptyMVar :: IO (MVar [(UUID, Socket)])
     putMVar clients []
-    putStrLn "Starting server..."
-    serve (Host "127.0.0.1") "44444" $ \(sock, remoteAddr) -> do
+    putStrLn "Enter nothing for default value."
+    putStr "IP (default: localhost): "
+    ip <- getLine
+    putStr "Port (default 44444): "
+    port <- getLine
+    let ip' = if Prelude.null ip then "127.0.0.1" else ip
+    let port' = if Prelude.null port then "44444" else port
+    serve (Host ip') port' $ \(sock, remoteAddr) -> do
         putStrLn $ "TCP connection from " ++ show remoteAddr
         uuid <- nextRandom
         first' <- isEmptyMVar first
